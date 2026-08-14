@@ -7,7 +7,7 @@
  * 비밀번호 변경: ADMIN_PASS 환경변수 또는 tools/.adminpass 파일.
  */
 import { createServer } from 'node:http';
-import { readFile, writeFile, copyFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, copyFile, mkdir, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
@@ -75,6 +75,30 @@ const server = createServer(async (req, res) => {
       await copyFile(CONTENT, join(BACKUPS, `content-${stamp}.json`));
       await writeFile(CONTENT, JSON.stringify(parsed, null, 2) + '\n', 'utf8');
       return send(res, 200, { ok: true, backup: `data/backups/content-${stamp}.json` });
+    }
+
+    /* --- 백업 목록 --- */
+    if (p === '/api/backups' && req.method === 'GET') {
+      if (!authed(req)) return send(res, 401, { error: 'unauthorized' });
+      if (!existsSync(BACKUPS)) return send(res, 200, []);
+      const files = (await readdir(BACKUPS)).filter(f => f.endsWith('.json')).sort().reverse();
+      return send(res, 200, files.slice(0, 30));
+    }
+
+    /* --- 백업에서 되돌리기 --- */
+    if (p === '/api/restore' && req.method === 'POST') {
+      if (!authed(req)) return send(res, 401, { error: 'unauthorized' });
+      const { file } = JSON.parse(await readBody(req) || '{}');
+      if (!file || file.includes('/') || file.includes('..') || !file.endsWith('.json'))
+        return send(res, 400, { error: '잘못된 파일명입니다.' });
+      const src = join(BACKUPS, file);
+      if (!existsSync(src)) return send(res, 404, { error: '백업을 찾을 수 없습니다.' });
+
+      // 되돌리기 직전 상태도 백업해 둔다 (되돌리기의 되돌리기)
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      await copyFile(CONTENT, join(BACKUPS, `content-${stamp}.json`));
+      await copyFile(src, CONTENT);
+      return send(res, 200, { ok: true });
     }
 
     /* --- 정적 파일 --- */

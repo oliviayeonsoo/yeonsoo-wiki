@@ -5,53 +5,104 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>연수위키 관리자</title>
 <style>
-:root{ --bg:#fff; --sub:#f6f7f8; --text:#212529; --muted:#7b8288; --line:#dcdcdc;
-       --accent:#00a495; --hl:#fff3cd; --hlt:#7a5a00; --danger:#dc3545; }
-@media (prefers-color-scheme:dark){ :root{ --bg:#1f2023; --sub:#26282c; --text:#d5d8db;
+:root{ --bg:#fff; --sub:#f6f7f8; --card:#fff; --text:#212529; --muted:#7b8288; --line:#dcdcdc;
+       --accent:#00a495; --accent-d:#00806f; --hl:#fff3cd; --hlt:#7a5a00; --danger:#dc3545; }
+@media (prefers-color-scheme:dark){ :root{ --bg:#1b1c1f; --sub:#25272b; --card:#212226; --text:#d5d8db;
        --muted:#8b9096; --line:#3a3d42; --hl:#3d3520; --hlt:#e0c877; } }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;
-  font-family:"Pretendard","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,sans-serif;}
-header{background:var(--accent);color:#fff;padding:11px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
-header b{font-size:16px}
-header .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
-header .warn{font-size:12px;opacity:.9}
-button{font-family:inherit;font-size:13.5px;border-radius:4px;border:1px solid var(--line);
-  background:var(--bg);color:var(--text);padding:6px 13px;cursor:pointer}
+  font-family:"Pretendard","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,sans-serif}
+button{font-family:inherit;font-size:13px;border-radius:4px;border:1px solid var(--line);
+  background:var(--card);color:var(--text);padding:5px 11px;cursor:pointer}
 button:hover{background:var(--sub)}
 button.pri{background:#fff;color:var(--accent);border-color:#fff;font-weight:700}
-button.pri:hover{opacity:.9}
-main{max-width:940px;margin:0 auto;padding:18px}
-.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:18px}
-.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;margin-bottom:-2px;padding:9px 15px;background:none}
-.tabs button.on{border-bottom-color:var(--accent);color:var(--accent);font-weight:700}
-.panel[hidden]{display:none}
-.grp{margin-bottom:26px}
-.grp h3{font-size:14.5px;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
-.f{display:grid;grid-template-columns:1fr;gap:5px;padding:11px 0;border-bottom:1px solid var(--line)}
-.f .lab{font-weight:600;font-size:13px}
-.f .ctx{font-size:12.3px;color:var(--muted);background:var(--sub);padding:6px 9px;border-radius:4px;
-  max-height:76px;overflow:auto}
-.f .ctx mark{background:var(--hl);color:var(--hlt);padding:0 3px;border-radius:2px}
-.f .path{font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
-input[type=text],input[type=password],textarea{width:100%;padding:7px 10px;border:1px solid var(--line);
+button.mini{padding:2px 7px;font-size:12px;line-height:1.5}
+button.del{color:var(--danger)}
+input[type=text],input[type=password],textarea,select{width:100%;padding:6px 9px;border:1px solid var(--line);
   border-radius:4px;background:var(--bg);color:var(--text);font-family:inherit;font-size:13.5px}
-input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
-textarea#raw{min-height:60vh;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.5;white-space:pre}
-.two{display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
-.two label{font-weight:600;font-size:13px}
-.msg{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#222;color:#fff;
-  padding:10px 18px;border-radius:20px;font-size:13.5px;z-index:50;box-shadow:0 4px 18px rgba(0,0,0,.3)}
+textarea{resize:vertical;min-height:62px;line-height:1.65}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+
+header{background:var(--accent);color:#fff;padding:9px 16px;display:flex;align-items:center;gap:11px;
+  position:sticky;top:0;z-index:20}
+header b{font-size:15.5px}
+header .sp{margin-left:auto;display:flex;gap:7px;align-items:center}
+#dirty{font-size:12px;background:rgba(255,255,255,.22);padding:2px 9px;border-radius:10px}
+#dirty[hidden]{display:none}
+
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--line);padding:0 16px;position:sticky;top:44px;
+  background:var(--bg);z-index:19;overflow-x:auto}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;margin-bottom:-2px;
+  padding:9px 14px;background:none;white-space:nowrap}
+.tabs button.on{border-bottom-color:var(--accent);color:var(--accent);font-weight:700}
+main{max-width:1000px;margin:0 auto;padding:16px}
+.panel[hidden]{display:none}
+
+.note{background:var(--sub);border-left:3px solid var(--accent);padding:9px 12px;border-radius:4px;
+  font-size:12.6px;color:var(--muted);margin-bottom:16px}
+.count{background:var(--hl);color:var(--hlt);border-radius:10px;padding:1px 8px;font-size:11.5px;font-weight:700}
+
+/* 문서 선택 */
+.docbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.docbar button.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+
+.card{border:1px solid var(--line);border-radius:6px;background:var(--card);margin-bottom:12px}
+.card>.hd{display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--sub);
+  border-bottom:1px solid var(--line);border-radius:6px 6px 0 0}
+.card>.hd .t{font-weight:700;font-size:13.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card>.bd{padding:11px}
+.card.fold>.bd{display:none}
+.card.fold>.hd{border-bottom:0;border-radius:6px}
+
+.row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:start;padding:7px 0}
+.row>label{font-weight:600;font-size:12.8px;padding-top:7px}
+.grid3{display:grid;grid-template-columns:80px 1fr 190px;gap:8px}
+
+/* 블록 */
+.blk{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:4px;margin:9px 0;background:var(--bg)}
+.blk .bh{display:flex;align-items:center;gap:6px;padding:5px 9px;border-bottom:1px solid var(--line)}
+.blk .bh .ty{font-size:11.5px;font-weight:700;color:var(--accent);letter-spacing:.03em}
+.blk .bb{padding:9px}
+.adds{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.spacer{flex:1}
+
+/* 표 편집 */
+table.ed{border-collapse:collapse;width:100%;font-size:12.8px}
+table.ed td,table.ed th{border:1px solid var(--line);padding:2px}
+table.ed input{border:0;border-radius:0;padding:5px 6px}
+table.ed input:focus{outline:2px solid var(--accent);outline-offset:-2px}
+table.ed th{background:var(--sub)}
+.tbtn{display:flex;gap:5px;margin-top:6px}
+
+/* 채워야 할 값 */
+.f{display:grid;gap:5px;padding:10px 0;border-bottom:1px solid var(--line)}
+.f .lab{font-weight:700;font-size:13px}
+.f .ctx{font-size:12.2px;color:var(--muted);background:var(--sub);padding:6px 9px;border-radius:4px;max-height:74px;overflow:auto}
+.f .ctx mark{background:var(--hl);color:var(--hlt);padding:0 3px;border-radius:2px}
+.f .path{font-size:10.5px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+.grp{margin-bottom:22px}
+.grp h3{font-size:14px;margin:0 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+
+textarea#raw{min-height:64vh;font-family:ui-monospace,Menlo,monospace;font-size:12.4px;white-space:pre}
+.bk{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.8px}
+.bk code{font-family:ui-monospace,Menlo,monospace;flex:1;color:var(--muted)}
+
+.msg{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222;color:#fff;
+  padding:9px 18px;border-radius:20px;font-size:13.5px;z-index:60;box-shadow:0 4px 18px rgba(0,0,0,.3);max-width:90vw}
 .msg.err{background:var(--danger)}
 .msg[hidden]{display:none}
-.login{max-width:320px;margin:14vh auto;text-align:center}
-.login h1{font-size:19px;margin-bottom:4px}
-.login p{color:var(--muted);font-size:12.5px;margin-top:0}
-.login input{margin:14px 0 10px;text-align:center}
+.login{max-width:310px;margin:14vh auto;text-align:center}
+.login h1{font-size:19px;margin-bottom:2px}
+.login p{color:var(--muted);font-size:12.4px;margin-top:0}
+.login input{margin:14px 0 9px;text-align:center}
 .login button{width:100%;background:var(--accent);color:#fff;border-color:var(--accent);padding:9px}
-.note{background:var(--sub);border-left:3px solid var(--accent);padding:10px 13px;border-radius:4px;
-  font-size:12.8px;color:var(--muted);margin-bottom:18px}
-.count{background:var(--hl);color:var(--hlt);border-radius:10px;padding:1px 9px;font-size:12px;font-weight:700}
+kbd{background:var(--sub);border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;
+  padding:1px 5px;font-size:11.5px;font-family:inherit}
+.help table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:16px}
+.help td,.help th{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+.help th{background:var(--sub)}
+.help code{background:var(--sub);padding:1px 5px;border-radius:3px;font-family:ui-monospace,Menlo,monospace;font-size:12.3px}
+@media (max-width:640px){ .row{grid-template-columns:1fr} .grid3{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -66,98 +117,300 @@ textarea#raw{min-height:60vh;font-family:ui-monospace,Menlo,monospace;font-size:
 <div id="app" hidden>
   <header>
     <b>연수위키 관리자</b>
-    <span class="warn">data/content.json 을 직접 수정합니다</span>
+    <span id="dirty" hidden>● 저장 안 됨</span>
     <span class="sp">
+      <button id="preview">사이트 보기</button>
       <button id="reload">되돌리기</button>
-      <button class="pri" id="save">저장</button>
+      <button class="pri" id="save">저장 <kbd style="color:inherit;background:none;border:0">⌘S</kbd></button>
     </span>
   </header>
 
+  <div class="tabs">
+    <button data-tab="docs" class="on">문서</button>
+    <button data-tab="infobox">인포박스</button>
+    <button data-tab="ph">채워야 할 값 <span class="count" id="ph-count">0</span></button>
+    <button data-tab="basic">기본 정보</button>
+    <button data-tab="raw">원본 JSON</button>
+    <button data-tab="help">도움말</button>
+  </div>
+
   <main>
-    <div class="tabs">
-      <button data-tab="ph" class="on">채워야 할 값 <span class="count" id="ph-count">0</span></button>
-      <button data-tab="basic">기본 정보</button>
-      <button data-tab="raw">원본 JSON</button>
-    </div>
-
-    <div class="panel" id="tab-ph">
-      <div class="note">본문에 <b>{{ }}</b>로 표시된 미확인 값을 모두 찾아왔습니다.
-        빈칸으로 두면 그대로 유지되고, 값을 넣으면 해당 위치의 문장에 바로 반영됩니다.</div>
-      <div id="ph-list"></div>
-    </div>
-
+    <div class="panel" id="tab-docs"></div>
+    <div class="panel" id="tab-infobox" hidden></div>
+    <div class="panel" id="tab-ph" hidden></div>
     <div class="panel" id="tab-basic" hidden></div>
-
     <div class="panel" id="tab-raw" hidden>
-      <div class="note">전체 콘텐츠를 직접 편집합니다. 저장 시 JSON 형식을 검사하고,
-        기존 파일은 <b>data/backups/</b> 에 자동 백업됩니다.</div>
+      <div class="note">전체 내용을 직접 편집합니다. 저장 시 JSON 형식을 검사하고, 기존 파일은 자동 백업됩니다.
+        <b>이 탭이 열려 있으면 여기 내용이 우선</b>합니다.</div>
       <textarea id="raw" spellcheck="false"></textarea>
+      <h3 style="font-size:14px;margin:22px 0 6px">백업에서 되돌리기</h3>
+      <div id="bklist"></div>
     </div>
+    <div class="panel help" id="tab-help" hidden></div>
   </main>
 </div>
 
 <div class="msg" id="msg" hidden></div>
 
 <script>
-let TOKEN = null, DATA = null, FIELDS = [];
-const $ = s => document.querySelector(s);
+let TOKEN = null, DATA = null, FIELDS = [], CURDOC = null, DIRTY = false;
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const P = (...a) => esc(JSON.stringify(a.flat()));
 
 function toast(text, err){
   const m = $('#msg'); m.textContent = text; m.className = 'msg' + (err ? ' err' : ''); m.hidden = false;
-  clearTimeout(toast._t); toast._t = setTimeout(() => m.hidden = true, 3200);
+  clearTimeout(toast._t); toast._t = setTimeout(() => m.hidden = true, 3400);
 }
 const api = (path, opt = {}) => fetch(path, {
   ...opt, headers: { 'content-type':'application/json', authorization: 'Bearer ' + TOKEN, ...(opt.headers||{}) }
 });
+const getIn = (o, p) => p.reduce((a, k) => a?.[k], o);
+const setIn = (o, p, v) => { getIn(o, p.slice(0, -1))[p.at(-1)] = v; };
+function dirty(on = true){ DIRTY = on; $('#dirty').hidden = !on; }
 
-/* ---------- 로그인 ---------- */
+/* ================= 로그인 ================= */
 async function login(){
-  const r = await fetch('/api/login', {
-    method:'POST', headers:{'content-type':'application/json'},
-    body: JSON.stringify({ pass: $('#pass').value })
-  });
+  const r = await fetch('/api/login', { method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({ pass: $('#pass').value }) });
   const j = await r.json();
   if (!r.ok) return toast(j.error, true);
-  TOKEN = j.token;
-  sessionStorage.setItem('ysw-admin', TOKEN);
+  TOKEN = j.token; sessionStorage.setItem('ysw-admin', TOKEN);
   $('#login').hidden = true; $('#app').hidden = false;
   load();
 }
 $('#login-btn').onclick = login;
 $('#pass').onkeydown = e => { if (e.key === 'Enter') login(); };
 
-/* ---------- 로드 ---------- */
+/* ================= 로드 ================= */
 async function load(){
   const r = await api('/api/content');
-  if (!r.ok) { toast('불러오기 실패', true); return; }
+  if (!r.ok) return toast('불러오기 실패', true);
   DATA = await r.json();
+  CURDOC = CURDOC && DATA.docs[CURDOC] ? CURDOC : DATA.meta.mainDoc;
   $('#raw').value = JSON.stringify(DATA, null, 2);
-  renderPlaceholders();
-  renderBasic();
+  renderAll(); dirty(false);
 }
-$('#reload').onclick = () => { load(); toast('파일에서 다시 불러왔습니다'); };
+function renderAll(){ renderDocs(); renderInfobox(); renderPh(); renderBasic(); renderHelp(); }
+$('#reload').onclick = async () => {
+  if (DIRTY && !confirm('저장하지 않은 변경이 있습니다. 파일 내용으로 되돌릴까요?')) return;
+  await load(); toast('파일에서 다시 불러왔습니다');
+};
+$('#preview').onclick = () => window.open('http://localhost:8123/#/' + encodeURIComponent(CURDOC), '_blank');
 
-/* ---------- {{ }} 스캐너 ---------- */
+/* ================= 문서 탭 ================= */
+const BLOCK_LABEL = { p:'문단', list:'목록', table:'표', cards:'카드', badges:'뱃지', quote:'인용' };
+const NEWBLOCK = {
+  p:      () => ({ t:'p', v:'' }),
+  list:   () => ({ t:'list', v:[''] }),
+  table:  () => ({ t:'table', head:['',''], rows:[['','']] }),
+  cards:  () => ({ t:'cards', v:[{ name:'', tagline:'', body:'', award:'' }] }),
+  badges: () => ({ t:'badges', v:[{ group:'', items:[] }] }),
+  quote:  () => ({ t:'quote', v:'', by:'' })
+};
+
+function ta(path, val, ph, rows){
+  return `<textarea data-p="${P(path)}" rows="${rows||3}" placeholder="${esc(ph||'')}">${esc(val)}</textarea>`;
+}
+function tx(path, val, ph){
+  return `<input type="text" data-p="${P(path)}" value="${esc(val)}" placeholder="${esc(ph||'')}">`;
+}
+function lines(path, arr, ph, rows){
+  return `<textarea data-p="${P(path)}" data-lines="1" rows="${rows||3}" placeholder="${esc(ph||'')}">${esc((arr||[]).join('\n'))}</textarea>`;
+}
+const moveBtns = (path, i, len) =>
+  `<button class="mini" data-cmd="up" data-p="${P(path)}" data-i="${i}" ${i===0?'disabled':''}>↑</button>
+   <button class="mini" data-cmd="down" data-p="${P(path)}" data-i="${i}" ${i===len-1?'disabled':''}>↓</button>
+   <button class="mini del" data-cmd="del" data-p="${P(path)}" data-i="${i}">삭제</button>`;
+
+function blockEditor(b, path, i, len){
+  let body = '';
+  if (b.t === 'p')     body = ta([...path, i, 'v'], b.v, "본문. '''굵게''' [[문서]] [fn:1] {{미확인}}", 3);
+  if (b.t === 'quote') body = `<div class="row"><label>인용문</label>${tx([...path,i,'v'], b.v)}</div>
+                               <div class="row"><label>출처</label>${tx([...path,i,'by'], b.by, '예: 포지셔닝을 정하며')}</div>`;
+  if (b.t === 'list')  body = lines([...path, i, 'v'], b.v, '한 줄에 항목 하나', 4);
+
+  if (b.t === 'table'){
+    const bp = [...path, i];
+    body = `<table class="ed"><thead><tr>${b.head.map((h, c) =>
+        `<th>${tx([...bp,'head',c], h, '머리글')}</th>`).join('')}<th style="width:34px"></th></tr></thead>
+      <tbody>${b.rows.map((r, ri) => `<tr>${r.map((c, ci) =>
+        `<td>${tx([...bp,'rows',ri,ci], c)}</td>`).join('')}
+        <td style="text-align:center"><button class="mini del" data-cmd="del" data-p="${P([...bp,'rows'])}" data-i="${ri}">×</button></td></tr>`).join('')}
+      </tbody></table>
+      <div class="tbtn">
+        <button class="mini" data-cmd="row-add" data-p="${P(bp)}">+ 행</button>
+        <button class="mini" data-cmd="col-add" data-p="${P(bp)}">+ 열</button>
+        <button class="mini del" data-cmd="col-del" data-p="${P(bp)}">− 열</button>
+      </div>`;
+  }
+
+  if (b.t === 'cards'){
+    const bp = [...path, i, 'v'];
+    body = b.v.map((c, ci) => `<div class="card"><div class="hd">
+        <span class="t">${esc(c.name || '(이름 없음)')}</span>${moveBtns(bp, ci, b.v.length)}</div>
+      <div class="bd">
+        <div class="row"><label>이름</label>${tx([...bp,ci,'name'], c.name)}</div>
+        <div class="row"><label>한 줄 설명</label>${tx([...bp,ci,'tagline'], c.tagline)}</div>
+        <div class="row"><label>본문</label>${ta([...bp,ci,'body'], c.body, '', 4)}</div>
+        <div class="row"><label>수상</label>${tx([...bp,ci,'award'], c.award, '없으면 비워두기')}</div>
+      </div></div>`).join('') +
+      `<button class="mini" data-cmd="card-add" data-p="${P(bp)}">+ 카드</button>`;
+  }
+
+  if (b.t === 'badges'){
+    const bp = [...path, i, 'v'];
+    body = b.v.map((g, gi) => `<div class="grid3" style="margin-bottom:7px;align-items:center">
+        ${tx([...bp,gi,'group'], g.group, '분류명')}
+        <input type="text" data-p="${P([...bp,gi,'items'])}" data-csv="1"
+               value="${esc((g.items||[]).join(', '))}" placeholder="쉼표로 구분">
+        <span>${moveBtns(bp, gi, b.v.length)}</span>
+      </div>`).join('') +
+      `<button class="mini" data-cmd="badge-add" data-p="${P(bp)}">+ 분류</button>`;
+  }
+
+  return `<div class="blk"><div class="bh">
+      <span class="ty">${BLOCK_LABEL[b.t] || b.t}</span><span class="spacer"></span>${moveBtns(path, i, len)}
+    </div><div class="bb">${body}</div></div>`;
+}
+
+function addBar(path){
+  return `<div class="adds">${Object.entries(BLOCK_LABEL).map(([k, l]) =>
+    `<button class="mini" data-cmd="blk-add" data-p="${P(path)}" data-t="${k}">+ ${l}</button>`).join('')}</div>`;
+}
+
+function sectionEditor(s, path, i, len, child){
+  const bp = [...path, i, 'blocks'];
+  return `<div class="card"><div class="hd">
+      <button class="mini" data-cmd="fold">⌄</button>
+      <span class="t">${esc(s.num)}. ${esc(s.title)}</span>${moveBtns(path, i, len)}
+    </div><div class="bd">
+      <div class="grid3">
+        ${tx([...path,i,'num'], s.num, '번호')}
+        ${tx([...path,i,'title'], s.title, '제목')}
+        ${tx([...path,i,'subdoc'], s.subdoc || '', '하위 문서명 (있으면 목차가 파란색)')}
+      </div>
+      ${(s.blocks||[]).map((b, bi) => blockEditor(b, bp, bi, s.blocks.length)).join('')}
+      ${addBar(bp)}
+      ${!child ? `<div style="margin-top:12px">
+        ${(s.children||[]).map((c, ci) => sectionEditor(c, [...path,i,'children'], ci, s.children.length, true)).join('')}
+        <button class="mini" data-cmd="sub-add" data-p="${P([...path,i])}">+ 하위 섹션</button>
+      </div>` : ''}
+    </div></div>`;
+}
+
+function renderDocs(){
+  const names = Object.keys(DATA.docs);
+  const d = DATA.docs[CURDOC];
+
+  $('#tab-docs').innerHTML = `
+    <div class="docbar">
+      ${names.map(n => `<button data-cmd="pick" data-n="${esc(n)}" class="${n===CURDOC?'on':''}">${esc(n)}</button>`).join('')}
+      <button class="mini" data-cmd="doc-add">+ 새 문서</button>
+      <span class="spacer"></span>
+      <button class="mini" data-cmd="doc-rename">이름 변경</button>
+      ${CURDOC !== DATA.meta.mainDoc ? `<button class="mini del" data-cmd="doc-del">문서 삭제</button>` : ''}
+    </div>
+
+    <div class="card"><div class="hd"><span class="t">문서 설정</span></div><div class="bd">
+      <div class="row"><label>제목</label>${tx(['docs',CURDOC,'title'], d.title)}</div>
+      <div class="row"><label>상위 문서</label>${tx(['docs',CURDOC,'parent'], d.parent || '', '없으면 비워두기')}</div>
+      <div class="row"><label>인포박스</label>
+        <select data-p="${P(['docs',CURDOC,'showInfobox'])}" data-sel="1">
+          <option value="true"  ${d.showInfobox===true?'selected':''}>전체 (사진 포함)</option>
+          <option value="mini"  ${d.showInfobox==='mini'?'selected':''}>축약</option>
+          <option value="false" ${!d.showInfobox?'selected':''}>표시 안 함</option>
+        </select></div>
+      <div class="row"><label>분류</label>${lines(['docs',CURDOC,'categories'], d.categories, '한 줄에 하나', 3)}</div>
+      <div class="row"><label>안내문</label>${lines(['docs',CURDOC,'hatnotes'], d.hatnotes, '문서 상단 ➜ 안내. 한 줄에 하나', 2)}</div>
+    </div></div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin:18px 0 8px">
+      <h3 style="font-size:15px;margin:0;flex:1">섹션 (${d.sections.length})</h3>
+      <button class="mini" data-cmd="renumber">번호 다시 매기기</button>
+      <button class="mini" data-cmd="sec-add">+ 섹션</button>
+    </div>
+    ${d.sections.map((s, i) => sectionEditor(s, ['docs',CURDOC,'sections'], i, d.sections.length)).join('')}
+
+    <div class="card" style="margin-top:18px"><div class="hd"><span class="t">각주</span></div><div class="bd">
+      <div class="note" style="margin:0 0 10px">본문에서 <code>[fn:1]</code> 처럼 번호로 참조합니다. 순서를 바꾸면 본문의 번호도 함께 고쳐야 합니다.</div>
+      ${(d.footnotes||[]).map((f, i) => `<div class="grid3" style="margin-bottom:6px;align-items:center">
+        <div style="padding-top:6px;font-weight:700">[${i+1}]</div>
+        ${tx(['docs',CURDOC,'footnotes',i], f)}
+        <span>${moveBtns(['docs',CURDOC,'footnotes'], i, d.footnotes.length)}</span>
+      </div>`).join('')}
+      <button class="mini" data-cmd="fn-add">+ 각주</button>
+    </div></div>`;
+}
+
+/* ================= 인포박스 탭 ================= */
+function renderInfobox(){
+  const ib = DATA.infobox;
+  $('#tab-infobox').innerHTML = `
+    <div class="note">모든 문서에 공통으로 나오는 프로필 카드입니다. 순서를 바꾸면 사이트에도 그대로 반영됩니다.</div>
+
+    <div class="card"><div class="hd"><span class="t">머리 부분</span></div><div class="bd">
+      <div class="row"><label>사진 경로</label>${tx(['infobox','photo'], ib.photo, '예: assets/profile.jpg')}</div>
+      <div class="row"><label>배너 — 기관</label>${tx(['infobox','banner','org'], ib.banner.org)}</div>
+      <div class="row"><label>배너 — 부제</label>${tx(['infobox','banner','sub'], ib.banner.sub)}</div>
+      <div class="row"><label>이름</label>${tx(['infobox','name'], ib.name)}</div>
+      <div class="row"><label>한자</label>${tx(['infobox','hanja'], ib.hanja)}</div>
+      <div class="row"><label>영문</label>${tx(['infobox','roman'], ib.roman)}</div>
+    </div></div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin:18px 0 8px">
+      <h3 style="font-size:15px;margin:0;flex:1">항목 (${ib.rows.length})</h3>
+      <button class="mini" data-cmd="ib-add">+ 항목</button>
+      <button class="mini" data-cmd="ib-add-collapse">+ 접이식 항목</button>
+    </div>
+    ${ib.rows.map((r, i) => {
+      const p = ['infobox','rows',i];
+      let val;
+      if (r.type === 'collapse'){
+        val = `<div class="note" style="margin:0 0 8px">접이식 목록 — 한 줄에 <code>내용 | 오른쪽 값</code></div>
+          <textarea data-p="${P([...p,'value'])}" data-pairs="1" rows="${Math.max(3, r.value.length)}"
+            >${esc(r.value.map(x => x.join(' | ')).join('\n'))}</textarea>`;
+      } else {
+        val = ta([...p,'value'], r.value, '', 2);
+      }
+      return `<div class="card"><div class="hd">
+          <button class="mini" data-cmd="fold">⌄</button>
+          <span class="t">${esc(r.label)}${r.type ? ` <span style="color:var(--muted);font-weight:400">· ${esc(r.type)}</span>` : ''}</span>
+          ${moveBtns(['infobox','rows'], i, ib.rows.length)}
+        </div><div class="bd">
+          <div class="row"><label>라벨</label>${tx([...p,'label'], r.label)}</div>
+          <div class="row"><label>값</label>${val}</div>
+        </div></div>`;
+    }).join('')}
+
+    <div class="card" style="margin-top:18px"><div class="hd"><span class="t">링크 (맨 아래 아이콘 행)</span></div><div class="bd">
+      ${ib.links.map((l, i) => `<div class="grid3" style="margin-bottom:7px;align-items:center">
+        ${tx(['infobox','links',i,'icon'], l.icon, '아이콘')}
+        ${tx(['infobox','links',i,'url'], l.url, 'URL')}
+        <span>${tx(['infobox','links',i,'label'], l.label, '이름')}</span>
+      </div>`).join('')}
+      <button class="mini" data-cmd="link-add">+ 링크</button>
+    </div></div>`;
+}
+
+/* ================= 채워야 할 값 ================= */
 function scan(node, path, out){
   if (typeof node === 'string'){
     const re = /\{\{([^}]*)\}\}/g; let m, i = 0;
-    while ((m = re.exec(node))) out.push({ path:[...path], occ:i++, label:m[1], token:m[0], ctx:node });
+    while ((m = re.exec(node))) out.push({ path:[...path], occ:i++, label:m[1], ctx:node });
   } else if (Array.isArray(node)) node.forEach((v, k) => scan(v, [...path, k], out));
   else if (node && typeof node === 'object') Object.entries(node).forEach(([k, v]) => scan(v, [...path, k], out));
   return out;
 }
-const getIn = (o, p) => p.reduce((a, k) => a?.[k], o);
-const setIn = (o, p, v) => { const last = p.at(-1); getIn(o, p.slice(0, -1))[last] = v; };
-
-/* 경로 → 사람이 읽는 위치 */
 function human(p){
-  if (p[0] === 'docs') {
-    const doc = p[1];
-    const d = DATA.docs[doc];
+  if (p[0] === 'docs'){
+    const doc = p[1], d = DATA.docs[doc];
     if (p[2] === 'sections'){
       const s = d.sections[p[3]];
-      return `${doc} › ${s ? s.num + '. ' + s.title : '섹션'}`;
+      const c = (p[4] === 'children') ? s?.children?.[p[5]] : null;
+      const t = c || s;
+      return `${doc} › ${t ? t.num + '. ' + t.title : '섹션'}`;
     }
     return doc;
   }
@@ -165,83 +418,220 @@ function human(p){
   if (p[0] === 'meta')    return '문서 정보';
   return p.slice(0, 2).join(' › ');
 }
-
-function renderPlaceholders(){
+function renderPh(){
   FIELDS = scan(DATA, [], []);
   $('#ph-count').textContent = FIELDS.length;
-
   const groups = {};
   FIELDS.forEach((f, i) => { (groups[human(f.path)] ??= []).push({ ...f, i }); });
 
-  $('#ph-list').innerHTML = Object.entries(groups).map(([g, list]) => `
-    <div class="grp"><h3>${esc(g)}</h3>${list.map(f => {
-      let n = -1;
-      const ctx = esc(f.ctx).replace(/\{\{[^}]*\}\}/g, m =>
-        (++n === f.occ) ? `<mark>${m}</mark>` : m).replace(/<br>/g, ' ');
-      return `<div class="f">
-        <div class="lab">${esc(f.label || '(빈 값)')}</div>
-        <div class="ctx">${ctx.slice(0, 400)}</div>
-        <input type="text" data-i="${f.i}" placeholder="값을 입력하면 이 자리에 들어갑니다">
-        <div class="path">${esc(f.path.join(' / '))}</div>
-      </div>`;
-    }).join('')}</div>`).join('') || '<div class="note">채워야 할 값이 없습니다. 👏</div>';
+  $('#tab-ph').innerHTML = `<div class="note">본문의 <b>{{ }}</b> 표시를 모두 찾아왔습니다.
+      값을 넣고 저장하면 해당 자리에 그대로 들어갑니다. 빈칸은 그대로 남습니다.</div>` +
+    (Object.entries(groups).map(([g, list]) => `<div class="grp"><h3>${esc(g)}</h3>${
+      list.map(f => {
+        let n = -1;
+        const ctx = esc(f.ctx).replace(/\{\{[^}]*\}\}/g, m => (++n === f.occ) ? `<mark>${m}</mark>` : m).replace(/&lt;br&gt;/g, ' ');
+        return `<div class="f">
+          <div class="lab">${esc(f.label || '(빈 값)')}</div>
+          <div class="ctx">${ctx.slice(0, 400)}</div>
+          <input type="text" data-ph="${f.i}" placeholder="여기에 값을 입력">
+          <div class="path">${esc(f.path.join(' / '))}</div>
+        </div>`;
+      }).join('')}</div>`).join('') || '<div class="note">채워야 할 값이 없습니다. 👏</div>');
 }
 
-/* ---------- 기본 정보 ---------- */
+/* ================= 기본 정보 ================= */
 const BASIC = [
-  ['meta.editCount',    '편집 횟수'],
-  ['meta.debutDate',    '데뷔일 (YYYY-MM-DD)'],
-  ['meta.contact',      '연락 이메일'],
-  ['infobox.photo',     '프로필 사진 경로 (예: assets/profile.jpg)'],
-  ['infobox.name',      '이름'],
-  ['infobox.hanja',     '한자'],
-  ['infobox.roman',     '영문 표기'],
-  ['infobox.banner.org','소속 배너 — 기관'],
-  ['infobox.banner.sub','소속 배너 — 부제'],
-  ['infobox.links.0.url','GitHub URL'],
-  ['infobox.links.1.url','LinkedIn URL'],
-  ['infobox.links.2.url','이메일 링크 (mailto:)']
+  ['meta.siteName',  '사이트 이름'],
+  ['meta.mainDoc',   '대표 문서'],
+  ['meta.editCount', '편집 횟수 (제목 옆 뱃지)'],
+  ['meta.debutDate', '데뷔일 (YYYY-MM-DD) — "+N일째" 계산 기준'],
+  ['meta.contact',   '연락 이메일'],
+  ['meta.license',   '하단 고지문']
 ];
 function renderBasic(){
-  $('#tab-basic').innerHTML = `<div class="note">인포박스와 문서 상단에 바로 반영되는 값입니다.
-    저장하면 <b>최근 수정 시각</b>은 자동으로 현재 시각이 됩니다.</div>` +
-    BASIC.map(([p, label]) => {
-      const v = esc(getIn(DATA, p.split('.').map(k => /^\d+$/.test(k) ? +k : k)) ?? '');
-      // data-orig: 실제로 고친 칸만 반영해야 "채워야 할 값" 탭의 치환 결과를 덮어쓰지 않음
-      return `<div class="two">
-        <label>${esc(label)}</label>
-        <input type="text" data-basic="${p}" data-orig="${v}" value="${v}">
-      </div>`;
-    }).join('');
+  $('#tab-basic').innerHTML = `<div class="note">저장하면 <b>최근 수정 시각</b>은 자동으로 현재 시각이 됩니다.</div>` +
+    BASIC.map(([p, label]) => `<div class="row" style="grid-template-columns:230px 1fr">
+      <label>${esc(label)}</label>${tx(p.split('.'), getIn(DATA, p.split('.')) ?? '')}
+    </div>`).join('');
 }
 
-/* ---------- 탭 ---------- */
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
-  ['ph','basic','raw'].forEach(t => $('#tab-' + t).hidden = (t !== b.dataset.tab));
+/* ================= 도움말 ================= */
+function renderHelp(){
+  const r = [
+    ["'''강조'''", '<b>굵게</b>'],
+    ['[[공연수/경력]]', '내부 문서 링크. 없는 문서면 빨간 링크가 됩니다'],
+    ['[[공연수/경력|경력]]', '라벨을 따로 지정'],
+    ['[보기](https://…)', '외부 링크 (새 탭)'],
+    ['[fn:1]', '각주 — 그 문서 각주 목록의 1번'],
+    ['{{한자}}', '아직 못 채운 값. 사이트에 노란색으로 표시되고 "채워야 할 값" 탭에 모입니다'],
+    ['&lt;br&gt;', '줄바꿈'],
+    ['&lt;span class="muted"&gt;…&lt;/span&gt;', '흐린 작은 글씨']
+  ];
+  $('#tab-help').innerHTML = `
+    <h3 style="font-size:15px">본문 표기법</h3>
+    <table><tr><th style="width:230px">표기</th><th>결과</th></tr>
+      ${r.map(([a, b]) => `<tr><td><code>${a.startsWith('&') ? a : esc(a)}</code></td><td>${b}</td></tr>`).join('')}
+    </table>
+    <h3 style="font-size:15px">알아두면 좋은 것</h3>
+    <ul>
+      <li><b>목차 색상</b> — 섹션에 <b>하위 문서</b>를 지정하면 목차에서 파란색이 됩니다. 안 하면 검정색(문서 내 앵커).</li>
+      <li><b>번호 다시 매기기</b> — 섹션 순서를 바꾼 뒤 누르면 번호와 앵커 id가 한 번에 정리됩니다.</li>
+      <li><b>저장</b> — <kbd>⌘S</kbd> / <kbd>Ctrl+S</kbd>. 저장할 때마다 <code>data/backups/</code> 에 이전 파일이 남습니다.</li>
+      <li><b>되돌리기</b> — 원본 JSON 탭 아래쪽에서 백업 시점을 골라 복원할 수 있습니다.</li>
+      <li><b>배포</b> — <code>tools/</code>, <code>docs/</code>, <code>data/backups/</code> 는 공개되지 않습니다.</li>
+    </ul>`;
+}
+
+/* ================= 입력 바인딩 ================= */
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.ph !== undefined) { dirty(); return; }   // 플레이스홀더는 저장 시 일괄 처리
+  if (!el.dataset.p) return;
+  const path = JSON.parse(el.dataset.p);
+  let v = el.value;
+  if (el.dataset.lines) v = v.split('\n').map(s => s.trim()).filter(Boolean);
+  else if (el.dataset.csv) v = v.split(',').map(s => s.trim()).filter(Boolean);
+  else if (el.dataset.pairs) v = v.split('\n').filter(s => s.trim())
+        .map(s => { const i = s.indexOf('|'); return i < 0 ? [s.trim(), ''] : [s.slice(0,i).trim(), s.slice(i+1).trim()]; });
+  else if (el.dataset.sel) v = (v === 'true') ? true : (v === 'false') ? false : v;
+  else if (path.at(-1) === 'editCount') v = Number(v) || 0;
+
+  if (path.at(-1) === 'subdoc' && !v) { delete getIn(DATA, path.slice(0,-1)).subdoc; }
+  else if (path.at(-1) === 'parent' && !v) { delete getIn(DATA, path.slice(0,-1)).parent; }
+  else setIn(DATA, path, v);
+  dirty();
 });
 
-/* ---------- 저장 ---------- */
-$('#save').onclick = async () => {
-  // 원본 JSON 탭이 열려 있으면 그쪽을 정본으로
+/* ================= 구조 편집 ================= */
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const cmd = b.dataset.cmd; if (!cmd) return;
+  const path = b.dataset.p ? JSON.parse(b.dataset.p) : null;
+  const arr = path ? getIn(DATA, path) : null;
+  const i = b.dataset.i !== undefined ? +b.dataset.i : null;
+  const d = DATA.docs[CURDOC];
+  let redraw = 'docs';
+
+  switch (cmd){
+    case 'fold': b.closest('.card').classList.toggle('fold'); return;
+    case 'pick': CURDOC = b.dataset.n; break;
+
+    case 'up':   if (i > 0) arr.splice(i-1, 0, arr.splice(i,1)[0]); break;
+    case 'down': if (i < arr.length-1) arr.splice(i+1, 0, arr.splice(i,1)[0]); break;
+    case 'del':
+      if (!confirm('삭제할까요?')) return;
+      arr.splice(i, 1); break;
+
+    case 'blk-add':   arr.push(NEWBLOCK[b.dataset.t]()); break;
+    case 'row-add':   getIn(DATA, path).rows.push(new Array(getIn(DATA, path).head.length).fill('')); break;
+    case 'col-add':   { const t = getIn(DATA, path); t.head.push(''); t.rows.forEach(r => r.push('')); break; }
+    case 'col-del':   { const t = getIn(DATA, path);
+                        if (t.head.length <= 1) return toast('열이 하나뿐입니다', true);
+                        t.head.pop(); t.rows.forEach(r => r.pop()); break; }
+    case 'card-add':  arr.push({ name:'', tagline:'', body:'', award:'' }); break;
+    case 'badge-add': arr.push({ group:'', items:[] }); break;
+
+    case 'sec-add':
+      d.sections.push({ id:'s-' + (d.sections.length+1), num:String(d.sections.length+1), title:'새 섹션', blocks:[NEWBLOCK.p()] });
+      break;
+    case 'sub-add': {
+      const s = getIn(DATA, path);
+      (s.children ??= []).push({ id:`s-${s.num}.${s.children.length+1}`, num:`${s.num}.${s.children.length+1}`, title:'새 하위 섹션', blocks:[NEWBLOCK.p()] });
+      break;
+    }
+    case 'renumber':
+      d.sections.forEach((s, si) => {
+        s.num = String(si+1); s.id = 's-' + s.num;
+        (s.children||[]).forEach((c, ci) => { c.num = `${si+1}.${ci+1}`; c.id = 's-' + c.num; });
+      });
+      toast('번호와 앵커를 다시 매겼습니다');
+      break;
+    case 'fn-add': (d.footnotes ??= []).push(''); break;
+
+    case 'doc-add': {
+      const n = prompt('새 문서 이름 (예: 공연수/수상)'); if (!n) return;
+      if (DATA.docs[n]) return toast('이미 있는 문서입니다', true);
+      DATA.docs[n] = { title:n, parent: n.includes('/') ? n.split('/')[0] : undefined,
+        categories:[], hatnotes:[], showInfobox:'mini',
+        sections:[{ id:'s-1', num:'1', title:'개요', blocks:[NEWBLOCK.p()] }], footnotes:[] };
+      CURDOC = n; break;
+    }
+    case 'doc-rename': {
+      const n = prompt('새 이름', CURDOC); if (!n || n === CURDOC) return;
+      if (DATA.docs[n]) return toast('이미 있는 문서입니다', true);
+      const old = CURDOC;
+      // 문서 키 이동 (순서 유지)
+      const next = {}; for (const [k, v] of Object.entries(DATA.docs)) next[k === old ? n : k] = v;
+      DATA.docs = next; DATA.docs[n].title = n;
+      // 참조 갱신: parent / subdoc / [[링크]] / 대표 문서
+      const fix = o => {
+        if (typeof o === 'string') return o.split(`[[${old}`).join(`[[${n}`);
+        if (Array.isArray(o)) return o.map(fix);
+        if (o && typeof o === 'object'){
+          for (const k of Object.keys(o)){
+            if ((k === 'parent' || k === 'subdoc') && o[k] === old) o[k] = n;
+            else o[k] = fix(o[k]);
+          }
+        }
+        return o;
+      };
+      DATA = fix(DATA);
+      if (DATA.meta.mainDoc === old) DATA.meta.mainDoc = n;
+      DATA.sidebar.recent.forEach(r => { if (r.doc === old) r.doc = n; });
+      CURDOC = n; toast('이름을 바꾸고 참조도 갱신했습니다'); break;
+    }
+    case 'doc-del':
+      if (!confirm(`"${CURDOC}" 문서를 삭제할까요?`)) return;
+      delete DATA.docs[CURDOC]; CURDOC = DATA.meta.mainDoc; break;
+
+    case 'ib-add':          DATA.infobox.rows.push({ label:'새 항목', value:'' }); redraw = 'infobox'; break;
+    case 'ib-add-collapse': DATA.infobox.rows.push({ label:'새 항목', type:'collapse', value:[['','']] }); redraw = 'infobox'; break;
+    case 'link-add':        DATA.infobox.links.push({ icon:'🔗', label:'링크', url:'' }); redraw = 'infobox'; break;
+
+    default: return;
+  }
+
+  dirty();
+  if (redraw === 'infobox') renderInfobox(); else renderDocs();
+  renderPh();
+});
+
+/* ================= 탭 ================= */
+$$('.tabs button').forEach(b => b.onclick = () => {
+  $$('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  ['docs','infobox','ph','basic','raw','help'].forEach(t => $('#tab-' + t).hidden = (t !== b.dataset.tab));
+  if (b.dataset.tab === 'raw'){ $('#raw').value = JSON.stringify(DATA, null, 2); loadBackups(); }
+});
+
+/* ================= 백업 ================= */
+async function loadBackups(){
+  const r = await api('/api/backups'); if (!r.ok) return;
+  const list = await r.json();
+  $('#bklist').innerHTML = list.length
+    ? list.map(f => `<div class="bk"><code>${esc(f.replace(/^content-|\.json$/g,'').replace('T',' ').slice(0,19))}</code>
+        <button class="mini" data-bk="${esc(f)}">이 시점으로 되돌리기</button></div>`).join('')
+    : '<div class="note" style="margin:0">백업이 없습니다.</div>';
+}
+$('#bklist').addEventListener('click', async e => {
+  const f = e.target.dataset?.bk; if (!f) return;
+  if (!confirm('현재 내용을 덮어씁니다. 되돌릴까요?\n(지금 상태도 백업됩니다)')) return;
+  const r = await api('/api/restore', { method:'POST', body: JSON.stringify({ file: f }) });
+  const j = await r.json();
+  if (!r.ok) return toast(j.error, true);
+  await load(); toast('되돌렸습니다');
+});
+
+/* ================= 저장 ================= */
+async function save(){
   if (!$('#tab-raw').hidden){
     try { DATA = JSON.parse($('#raw').value); }
     catch (e) { return toast('JSON 형식 오류: ' + e.message, true); }
   } else {
-    // 1) 기본 정보 — 실제로 고친 칸만. (먼저 적용해야 아래 {{ }} 치환이 최종 결과가 됨)
-    document.querySelectorAll('[data-basic]').forEach(inp => {
-      if (inp.value === inp.dataset.orig) return;
-      const path = inp.dataset.basic.split('.').map(x => /^\d+$/.test(x) ? +x : x);
-      let v = inp.value;
-      if (path.at(-1) === 'editCount') v = Number(v) || 0;
-      setIn(DATA, path, v);
-    });
-
-    // 2) {{ }} 치환
+    // {{ }} 치환 — 같은 문자열의 여러 자리를 순서대로 채운다
     const byPath = new Map();
-    document.querySelectorAll('#ph-list input[data-i]').forEach(inp => {
+    $$('#tab-ph input[data-ph]').forEach(inp => {
       const v = inp.value.trim(); if (!v) return;
-      const f = FIELDS[+inp.dataset.i];
+      const f = FIELDS[+inp.dataset.ph];
       const k = f.path.join('\u0000');
       if (!byPath.has(k)) byPath.set(k, []);
       byPath.get(k).push({ occ: f.occ, v });
@@ -250,19 +640,23 @@ $('#save').onclick = async () => {
       const path = k.split('\u0000').map(x => /^\d+$/.test(x) ? +x : x);
       let n = -1;
       setIn(DATA, path, getIn(DATA, path).replace(/\{\{[^}]*\}\}/g, m => {
-        const hit = list.find(e => e.occ === ++n); return hit ? hit.v : m;
+        const hit = list.find(x => x.occ === ++n); return hit ? hit.v : m;
       }));
     }
   }
 
   DATA.meta.updated = new Date().toISOString();
-
   const r = await api('/api/content', { method:'POST', body: JSON.stringify(DATA) });
   const j = await r.json();
   if (!r.ok) return toast(j.error, true);
-  toast('저장했습니다 · 백업: ' + j.backup);
-  load();
-};
+  toast('저장했습니다 · ' + j.backup.replace('data/backups/', '백업 '));
+  await load();
+}
+$('#save').onclick = save;
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 's'){ e.preventDefault(); save(); }
+});
+window.addEventListener('beforeunload', e => { if (DIRTY){ e.preventDefault(); e.returnValue = ''; } });
 
 /* 세션 복원 */
 const saved = sessionStorage.getItem('ysw-admin');
