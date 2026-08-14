@@ -1,0 +1,11 @@
+{
+  "name": "yeonsu-wiki",
+  "version": "1.0.0",
+  "private": true,
+  "description": "연수위키 — 나무위키 형식 포트폴리오",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8123",
+    "admin": "node tools/admin.mjs"
+  }
+}

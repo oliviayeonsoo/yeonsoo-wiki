@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>공연수 - 연수위키</title>
+<meta name="description" content="공연수 - 프로젝트 매니저 지망생. 데이터·기획·서비스 설계·운영을 아우르는 포트폴리오.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ① 전역 헤더 -->
+<header class="gnb">
+  <div class="gnb-inner">
+    <a class="logo" href="#/공연수"><span class="logo-mark">연</span>연수위키</a>
+    <nav class="gnb-nav">
+      <a href="#/act/recent">최근 변경</a>
+      <a href="#/act/discuss">방명록</a>
+      <a href="#/act/random">랜덤 문서</a>
+    </nav>
+    <div class="gnb-search">
+      <input type="search" id="search" placeholder="검색" autocomplete="off" aria-label="문서 검색">
+      <div id="search-results" class="search-results" hidden></div>
+    </div>
+    <button class="gnb-acct" id="theme-toggle" title="테마 전환" aria-label="테마 전환">◐</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <main class="col-main" id="doc"></main>
+  <!-- ⑩ 우측 사이드바 (데스크톱 전용) -->
+  <aside class="col-side" id="side"></aside>
+</div>
+
+<!-- ⑪ 플로팅 액션 클러스터 -->
+<div class="fab">
+  <button data-fab="toc" title="목차">≡</button>
+  <button data-fab="top" title="맨 위로">↑</button>
+  <button data-fab="bottom" title="맨 아래로">↓</button>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-box">
+    <div class="modal-head"><span id="modal-title"></span><button id="modal-close">✕</button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

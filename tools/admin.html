@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연수위키 관리자</title>
+<style>
+:root{ --bg:#fff; --sub:#f6f7f8; --text:#212529; --muted:#7b8288; --line:#dcdcdc;
+       --accent:#00a495; --hl:#fff3cd; --hlt:#7a5a00; --danger:#dc3545; }
+@media (prefers-color-scheme:dark){ :root{ --bg:#1f2023; --sub:#26282c; --text:#d5d8db;
+       --muted:#8b9096; --line:#3a3d42; --hl:#3d3520; --hlt:#e0c877; } }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;
+  font-family:"Pretendard","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,sans-serif;}
+header{background:var(--accent);color:#fff;padding:11px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+header b{font-size:16px}
+header .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+header .warn{font-size:12px;opacity:.9}
+button{font-family:inherit;font-size:13.5px;border-radius:4px;border:1px solid var(--line);
+  background:var(--bg);color:var(--text);padding:6px 13px;cursor:pointer}
+button:hover{background:var(--sub)}
+button.pri{background:#fff;color:var(--accent);border-color:#fff;font-weight:700}
+button.pri:hover{opacity:.9}
+main{max-width:940px;margin:0 auto;padding:18px}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:18px}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;margin-bottom:-2px;padding:9px 15px;background:none}
+.tabs button.on{border-bottom-color:var(--accent);color:var(--accent);font-weight:700}
+.panel[hidden]{display:none}
+.grp{margin-bottom:26px}
+.grp h3{font-size:14.5px;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.f{display:grid;grid-template-columns:1fr;gap:5px;padding:11px 0;border-bottom:1px solid var(--line)}
+.f .lab{font-weight:600;font-size:13px}
+.f .ctx{font-size:12.3px;color:var(--muted);background:var(--sub);padding:6px 9px;border-radius:4px;
+  max-height:76px;overflow:auto}
+.f .ctx mark{background:var(--hl);color:var(--hlt);padding:0 3px;border-radius:2px}
+.f .path{font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+input[type=text],input[type=password],textarea{width:100%;padding:7px 10px;border:1px solid var(--line);
+  border-radius:4px;background:var(--bg);color:var(--text);font-family:inherit;font-size:13.5px}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+textarea#raw{min-height:60vh;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.5;white-space:pre}
+.two{display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.two label{font-weight:600;font-size:13px}
+.msg{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#222;color:#fff;
+  padding:10px 18px;border-radius:20px;font-size:13.5px;z-index:50;box-shadow:0 4px 18px rgba(0,0,0,.3)}
+.msg.err{background:var(--danger)}
+.msg[hidden]{display:none}
+.login{max-width:320px;margin:14vh auto;text-align:center}
+.login h1{font-size:19px;margin-bottom:4px}
+.login p{color:var(--muted);font-size:12.5px;margin-top:0}
+.login input{margin:14px 0 10px;text-align:center}
+.login button{width:100%;background:var(--accent);color:#fff;border-color:var(--accent);padding:9px}
+.note{background:var(--sub);border-left:3px solid var(--accent);padding:10px 13px;border-radius:4px;
+  font-size:12.8px;color:var(--muted);margin-bottom:18px}
+.count{background:var(--hl);color:var(--hlt);border-radius:10px;padding:1px 9px;font-size:12px;font-weight:700}
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+  <h1>연수위키 관리자</h1>
+  <p>로컬(127.0.0.1)에서만 접속 가능합니다.</p>
+  <input type="password" id="pass" placeholder="비밀번호" autofocus>
+  <button id="login-btn">들어가기</button>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <b>연수위키 관리자</b>
+    <span class="warn">data/content.json 을 직접 수정합니다</span>
+    <span class="sp">
+      <button id="reload">되돌리기</button>
+      <button class="pri" id="save">저장</button>
+    </span>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button data-tab="ph" class="on">채워야 할 값 <span class="count" id="ph-count">0</span></button>
+      <button data-tab="basic">기본 정보</button>
+      <button data-tab="raw">원본 JSON</button>
+    </div>
+
+    <div class="panel" id="tab-ph">
+      <div class="note">본문에 <b>{{ }}</b>로 표시된 미확인 값을 모두 찾아왔습니다.
+        빈칸으로 두면 그대로 유지되고, 값을 넣으면 해당 위치의 문장에 바로 반영됩니다.</div>
+      <div id="ph-list"></div>
+    </div>
+
+    <div class="panel" id="tab-basic" hidden></div>
+
+    <div class="panel" id="tab-raw" hidden>
+      <div class="note">전체 콘텐츠를 직접 편집합니다. 저장 시 JSON 형식을 검사하고,
+        기존 파일은 <b>data/backups/</b> 에 자동 백업됩니다.</div>
+      <textarea id="raw" spellcheck="false"></textarea>
+    </div>
+  </main>
+</div>
+
+<div class="msg" id="msg" hidden></div>
+
+<script>
+let TOKEN = null, DATA = null, FIELDS = [];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function toast(text, err){
+  const m = $('#msg'); m.textContent = text; m.className = 'msg' + (err ? ' err' : ''); m.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => m.hidden = true, 3200);
+}
+const api = (path, opt = {}) => fetch(path, {
+  ...opt, headers: { 'content-type':'application/json', authorization: 'Bearer ' + TOKEN, ...(opt.headers||{}) }
+});
+
+/* ---------- 로그인 ---------- */
+async function login(){
+  const r = await fetch('/api/login', {
+    method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({ pass: $('#pass').value })
+  });
+  const j = await r.json();
+  if (!r.ok) return toast(j.error, true);
+  TOKEN = j.token;
+  sessionStorage.setItem('ysw-admin', TOKEN);
+  $('#login').hidden = true; $('#app').hidden = false;
+  load();
+}
+$('#login-btn').onclick = login;
+$('#pass').onkeydown = e => { if (e.key === 'Enter') login(); };
+
+/* ---------- 로드 ---------- */
+async function load(){
+  const r = await api('/api/content');
+  if (!r.ok) { toast('불러오기 실패', true); return; }
+  DATA = await r.json();
+  $('#raw').value = JSON.stringify(DATA, null, 2);
+  renderPlaceholders();
+  renderBasic();
+}
+$('#reload').onclick = () => { load(); toast('파일에서 다시 불러왔습니다'); };
+
+/* ---------- {{ }} 스캐너 ---------- */
+function scan(node, path, out){
+  if (typeof node === 'string'){
+    const re = /\{\{([^}]*)\}\}/g; let m, i = 0;
+    while ((m = re.exec(node))) out.push({ path:[...path], occ:i++, label:m[1], token:m[0], ctx:node });
+  } else if (Array.isArray(node)) node.forEach((v, k) => scan(v, [...path, k], out));
+  else if (node && typeof node === 'object') Object.entries(node).forEach(([k, v]) => scan(v, [...path, k], out));
+  return out;
+}
+const getIn = (o, p) => p.reduce((a, k) => a?.[k], o);
+const setIn = (o, p, v) => { const last = p.at(-1); getIn(o, p.slice(0, -1))[last] = v; };
+
+/* 경로 → 사람이 읽는 위치 */
+function human(p){
+  if (p[0] === 'docs') {
+    const doc = p[1];
+    const d = DATA.docs[doc];
+    if (p[2] === 'sections'){
+      const s = d.sections[p[3]];
+      return `${doc} › ${s ? s.num + '. ' + s.title : '섹션'}`;
+    }
+    return doc;
+  }
+  if (p[0] === 'infobox') return '인포박스';
+  if (p[0] === 'meta')    return '문서 정보';
+  return p.slice(0, 2).join(' › ');
+}
+
+function renderPlaceholders(){
+  FIELDS = scan(DATA, [], []);
+  $('#ph-count').textContent = FIELDS.length;
+
+  const groups = {};
+  FIELDS.forEach((f, i) => { (groups[human(f.path)] ??= []).push({ ...f, i }); });
+
+  $('#ph-list').innerHTML = Object.entries(groups).map(([g, list]) => `
+    <div class="grp"><h3>${esc(g)}</h3>${list.map(f => {
+      let n = -1;
+      const ctx = esc(f.ctx).replace(/\{\{[^}]*\}\}/g, m =>
+        (++n === f.occ) ? `<mark>${m}</mark>` : m).replace(/<br>/g, ' ');
+      return `<div class="f">
+        <div class="lab">${esc(f.label || '(빈 값)')}</div>
+        <div class="ctx">${ctx.slice(0, 400)}</div>
+        <input type="text" data-i="${f.i}" placeholder="값을 입력하면 이 자리에 들어갑니다">
+        <div class="path">${esc(f.path.join(' / '))}</div>
+      </div>`;
+    }).join('')}</div>`).join('') || '<div class="note">채워야 할 값이 없습니다. 👏</div>';
+}
+
+/* ---------- 기본 정보 ---------- */
+const BASIC = [
+  ['meta.editCount',    '편집 횟수'],
+  ['meta.debutDate',    '데뷔일 (YYYY-MM-DD)'],
+  ['meta.contact',      '연락 이메일'],
+  ['infobox.photo',     '프로필 사진 경로 (예: assets/profile.jpg)'],
+  ['infobox.name',      '이름'],
+  ['infobox.hanja',     '한자'],
+  ['infobox.roman',     '영문 표기'],
+  ['infobox.banner.org','소속 배너 — 기관'],
+  ['infobox.banner.sub','소속 배너 — 부제'],
+  ['infobox.links.0.url','GitHub URL'],
+  ['infobox.links.1.url','LinkedIn URL'],
+  ['infobox.links.2.url','이메일 링크 (mailto:)']
+];
+function renderBasic(){
+  $('#tab-basic').innerHTML = `<div class="note">인포박스와 문서 상단에 바로 반영되는 값입니다.
+    저장하면 <b>최근 수정 시각</b>은 자동으로 현재 시각이 됩니다.</div>` +
+    BASIC.map(([p, label]) => {
+      const v = esc(getIn(DATA, p.split('.').map(k => /^\d+$/.test(k) ? +k : k)) ?? '');
+      // data-orig: 실제로 고친 칸만 반영해야 "채워야 할 값" 탭의 치환 결과를 덮어쓰지 않음
+      return `<div class="two">
+        <label>${esc(label)}</label>
+        <input type="text" data-basic="${p}" data-orig="${v}" value="${v}">
+      </div>`;
+    }).join('');
+}
+
+/* ---------- 탭 ---------- */
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  ['ph','basic','raw'].forEach(t => $('#tab-' + t).hidden = (t !== b.dataset.tab));
+});
+
+/* ---------- 저장 ---------- */
+$('#save').onclick = async () => {
+  // 원본 JSON 탭이 열려 있으면 그쪽을 정본으로
+  if (!$('#tab-raw').hidden){
+    try { DATA = JSON.parse($('#raw').value); }
+    catch (e) { return toast('JSON 형식 오류: ' + e.message, true); }
+  } else {
+    // 1) 기본 정보 — 실제로 고친 칸만. (먼저 적용해야 아래 {{ }} 치환이 최종 결과가 됨)
+    document.querySelectorAll('[data-basic]').forEach(inp => {
+      if (inp.value === inp.dataset.orig) return;
+      const path = inp.dataset.basic.split('.').map(x => /^\d+$/.test(x) ? +x : x);
+      let v = inp.value;
+      if (path.at(-1) === 'editCount') v = Number(v) || 0;
+      setIn(DATA, path, v);
+    });
+
+    // 2) {{ }} 치환
+    const byPath = new Map();
+    document.querySelectorAll('#ph-list input[data-i]').forEach(inp => {
+      const v = inp.value.trim(); if (!v) return;
+      const f = FIELDS[+inp.dataset.i];
+      const k = f.path.join('\u0000');
+      if (!byPath.has(k)) byPath.set(k, []);
+      byPath.get(k).push({ occ: f.occ, v });
+    });
+    for (const [k, list] of byPath){
+      const path = k.split('\u0000').map(x => /^\d+$/.test(x) ? +x : x);
+      let n = -1;
+      setIn(DATA, path, getIn(DATA, path).replace(/\{\{[^}]*\}\}/g, m => {
+        const hit = list.find(e => e.occ === ++n); return hit ? hit.v : m;
+      }));
+    }
+  }
+
+  DATA.meta.updated = new Date().toISOString();
+
+  const r = await api('/api/content', { method:'POST', body: JSON.stringify(DATA) });
+  const j = await r.json();
+  if (!r.ok) return toast(j.error, true);
+  toast('저장했습니다 · 백업: ' + j.backup);
+  load();
+};
+
+/* 세션 복원 */
+const saved = sessionStorage.getItem('ysw-admin');
+if (saved){ TOKEN = saved; api('/api/content').then(r => {
+  if (r.ok){ $('#login').hidden = true; $('#app').hidden = false; load(); }
+}); }
+</script>
+</body>
+</html>
