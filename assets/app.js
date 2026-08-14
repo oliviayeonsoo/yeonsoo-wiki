@@ -248,27 +248,35 @@ function renderMissing(name){
 }
 
 /* ---------------- 사이드바 (실시간 갱신 연출) ---------------- */
-let sideT0 = Date.now();
+let sideT0 = Date.now(), sideBuilt = false;
 function renderSide(){
   const s = DATA.sidebar;
-  const shuffled = [...s.interests];
-  const shift = Math.floor((Date.now() - sideT0) / 4000) % shuffled.length;
-  const rotated = shuffled.slice(shift).concat(shuffled.slice(0, shift));
 
-  $('#side').innerHTML = `
-    <div class="widget">
-      <div class="widget-h">요즘 관심사</div>
-      <div class="widget-b">${rotated.map((t, i) =>
-        `<div class="wrow"><span class="rank">${i+1}</span><span class="wname">${esc(t)}</span></div>`).join('')}</div>
-    </div>
-    <div class="widget">
-      <div class="widget-h">최근 변경</div>
-      <div class="widget-b">${s.recent.map((r, i) => `<div class="wrow">
-        <span class="wname"><a href="#/${encodeURIComponent(r.doc)}">${esc(r.doc)}</a>
-          <span class="note">${esc(r.note)}</span></span>
-        <span class="ago">${timeAgo(Math.floor((Date.now() - sideT0)/1000) + i*37 + 11)}</span>
-      </div>`).join('')}</div>
-    </div>`;
+  // 컨택 위젯은 한 번만 만든다. (관심사만 주기적으로 순환)
+  if (!sideBuilt){
+    const c = s.contact || {};
+    $('#side').innerHTML = `
+      <div class="widget">
+        <div class="widget-h">요즘 관심사</div>
+        <div class="widget-b" id="interest-list"></div>
+      </div>
+      <div class="widget">
+        <div class="widget-h">${esc(c.title || '컨택')}</div>
+        <div class="widget-b contact">
+          <p class="cnote">${inline(c.note || '')}</p>
+          <button class="cbtn" data-act="contact">${esc(c.cta || '제안 보내기')}</button>
+          <div class="clinks">${DATA.infobox.links.map(l =>
+            `<a href="${esc(l.url)}" target="_blank" rel="noopener">
+               <span class="ci">${esc(l.icon)}</span>${esc(l.label)}</a>`).join('')}</div>
+        </div>
+      </div>`;
+    sideBuilt = true;
+  }
+
+  const shift = Math.floor((Date.now() - sideT0) / 4000) % s.interests.length;
+  const rotated = s.interests.slice(shift).concat(s.interests.slice(0, shift));
+  $('#interest-list').innerHTML = rotated.map((t, i) =>
+    `<div class="wrow"><span class="rank">${i+1}</span><span class="wname">${esc(t)}</span></div>`).join('');
 }
 
 /* ---------------- 모달 ---------------- */
@@ -278,9 +286,10 @@ function modal(title, html){
   $('#modal').hidden = false;
 }
 const MODALS = {
-  contact: () => modal('편집 요청', `<p>이 문서에 대한 수정 제안, 협업 및 채용 문의는 아래로 보내주세요.</p>
+  contact: () => modal('채용 · 협업 제안', `<p>제안, 문의, 이 문서에 대한 수정 요청 모두 환영합니다.</p>
     <p><a href="mailto:${DATA.meta.contact}">${DATA.meta.contact}</a></p>
-    <p><a href="${DATA.infobox.links[1].url}" target="_blank" rel="noopener">LinkedIn으로 연락하기</a></p>`),
+    ${DATA.infobox.links.filter(l => l.label !== 'Email').map(l =>
+      `<p><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} 바로가기</a></p>`).join('')}`),
   discuss: () => modal('토론', '<p>방명록은 준비 중입니다. 하고 싶은 말은 편집 요청으로 보내주세요.</p>'),
   history: () => modal('연혁', `<ol class="timeline">${
     (DATA.timeline || []).map(([when, what]) =>

@@ -481,10 +481,24 @@ const BASIC = [
   ['meta.license',   '하단 고지문']
 ];
 function renderBasic(){
+  const sb = DATA.sidebar || {};
+  const c  = sb.contact || {};
   $('#tab-basic').innerHTML = `<div class="note">저장하면 <b>최근 수정 시각</b>은 자동으로 현재 시각이 됩니다.</div>` +
     BASIC.map(([p, label]) => `<div class="row" style="grid-template-columns:230px 1fr">
       <label>${esc(label)}</label>${tx(p.split('.'), getIn(DATA, p.split('.')) ?? '')}
-    </div>`).join('');
+    </div>`).join('') +
+
+    `<h3 style="font-size:15px;margin:22px 0 8px">사이드바</h3>
+     <div class="card"><div class="hd"><span class="t">요즘 관심사</span></div><div class="bd">
+       <div class="note" style="margin:0 0 9px">한 줄에 하나. 4초마다 순위가 돌아가며 표시됩니다.</div>
+       ${lines(['sidebar','interests'], sb.interests, '한 줄에 하나', 7)}
+     </div></div>
+     <div class="card"><div class="hd"><span class="t">컨택</span></div><div class="bd">
+       <div class="row"><label>제목</label>${tx(['sidebar','contact','title'], c.title || '')}</div>
+       <div class="row"><label>안내 문구</label>${ta(['sidebar','contact','note'], c.note || '', '', 2)}</div>
+       <div class="row"><label>버튼 문구</label>${tx(['sidebar','contact','cta'], c.cta || '')}</div>
+       <div class="note" style="margin:9px 0 0">아래 링크 목록은 <b>인포박스 탭 → 링크</b>와 같은 것을 씁니다.</div>
+     </div></div>`;
 }
 
 /* ================= 도움말 ================= */

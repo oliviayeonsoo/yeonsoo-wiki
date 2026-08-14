@@ -279,6 +279,20 @@ a.ritem .rn{ color:var(--link); }
 .widget-b .ago{ color:var(--text-muted); font-size:11.3px; flex:none; }
 .widget-b .note{ display:block; color:var(--text-muted); font-size:11.5px; }
 
+/* 컨택 위젯 */
+.widget-b.contact{ padding:11px; }
+.contact .cnote{ margin:0 0 9px; font-size:12.6px; color:var(--text); line-height:1.55; }
+.contact .cbtn{ width:100%; background:var(--accent); color:#fff; border:0; border-radius:var(--radius);
+  padding:8px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+.contact .cbtn:hover{ background:var(--accent-dark); }
+.contact .clinks{ margin-top:9px; border-top:1px solid var(--border); padding-top:7px;
+  display:flex; flex-direction:column; gap:1px; }
+.contact .clinks a{ display:flex; align-items:center; gap:8px; padding:5px 6px;
+  border-radius:var(--radius); font-size:12.3px; color:var(--link); }
+.contact .clinks a:hover{ background:var(--bg-sub); text-decoration:none; }
+.contact .clinks .ci{ flex:none; width:22px; text-align:center; font-size:11px; font-weight:700;
+  color:var(--text-muted); }
+
 /* ---------- ⑪ FAB ---------- */
 .fab{ position:fixed; right:16px; bottom:16px; display:flex; flex-direction:column; gap:6px; z-index:50; }
 .fab button{ width:38px; height:38px; border-radius:50%; border:1px solid var(--border-strong);
