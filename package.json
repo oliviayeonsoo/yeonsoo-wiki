@@ -5,7 +5,7 @@
   "description": "연수위키 — 나무위키 형식 포트폴리오",
   "type": "module",
   "scripts": {
-    "start": "python3 -m http.server 8123",
+    "start": "node tools/serve.mjs",
     "admin": "node tools/admin.mjs"
   }
 }

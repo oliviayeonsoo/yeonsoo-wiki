@@ -33,6 +33,14 @@ jobs:
           cp -r data _site/
           rm -rf _site/data/backups
           test -f _site/data/content.json
+
+      # 배포마다 자산 URL에 커밋 해시를 붙여 브라우저가 옛 파일을 재사용하지 못하게 한다.
+      # (data/content.json 은 app.js 가 no-cache 로 받아온다)
+      - name: Cache-bust assets
+        run: |
+          V=${GITHUB_SHA::8}
+          sed -i "s|assets/style\.css|assets/style.css?v=$V|; s|assets/app\.js|assets/app.js?v=$V|" _site/index.html
+          grep -o 'assets/[a-z.]*?v=[a-f0-9]*' _site/index.html
           echo "--- 배포 대상 ---"
           find _site -type f | sort
 

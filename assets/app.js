@@ -378,7 +378,8 @@ $('#theme-toggle').addEventListener('click', () => {
 window.addEventListener('hashchange', route);
 
 /* ---------------- 부트 ---------------- */
-fetch('data/content.json')
+// no-cache: 내용을 갱신했을 때 브라우저가 옛 JSON을 계속 쓰지 않도록 매번 재검증(대개 304)
+fetch('data/content.json', { cache: 'no-cache' })
   .then(r => { if (!r.ok) throw new Error(`content.json ${r.status}`); return r.json(); })
   .then(d => {
     DATA = d;
