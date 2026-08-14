@@ -29,6 +29,10 @@ header b{font-size:15.5px}
 header .sp{margin-left:auto;display:flex;gap:7px;align-items:center}
 #dirty{font-size:12px;background:rgba(255,255,255,.22);padding:2px 9px;border-radius:10px}
 #dirty[hidden]{display:none}
+#deploy{position:relative}
+#pending:not(:empty){display:inline-block;min-width:17px;padding:0 5px;margin-left:4px;
+  background:#e8590c;color:#fff;border-radius:9px;font-size:11px;font-weight:700;line-height:17px;text-align:center}
+#deploy.busy{opacity:.6;pointer-events:none}
 
 .tabs{display:flex;gap:2px;border-bottom:2px solid var(--line);padding:0 16px;position:sticky;top:44px;
   background:var(--bg);z-index:19;overflow-x:auto}
@@ -122,6 +126,7 @@ kbd{background:var(--sub);border:1px solid var(--line);border-bottom-width:2px;b
       <button id="preview">사이트 보기</button>
       <button id="reload">되돌리기</button>
       <button class="pri" id="save">저장 <kbd style="color:inherit;background:none;border:0">⌘S</kbd></button>
+      <button id="deploy">공개하기 <span id="pending"></span></button>
     </span>
   </header>
 
@@ -190,7 +195,7 @@ async function load(){
   DATA = await r.json();
   CURDOC = CURDOC && DATA.docs[CURDOC] ? CURDOC : DATA.meta.mainDoc;
   $('#raw').value = JSON.stringify(DATA, null, 2);
-  renderAll(); dirty(false);
+  renderAll(); dirty(false); deployStatus();
 }
 function renderAll(){ renderDocs(); renderInfobox(); renderPh(); renderBasic(); renderHelp(); }
 $('#reload').onclick = async () => {
@@ -706,6 +711,39 @@ document.addEventListener('keydown', e => {
   if ((e.metaKey || e.ctrlKey) && e.key === 's'){ e.preventDefault(); save(); }
 });
 window.addEventListener('beforeunload', e => { if (DIRTY){ e.preventDefault(); e.returnValue = ''; } });
+
+/* ================= 공개하기 (커밋 + 푸시) =================
+   관리자 저장은 이 컴퓨터의 파일만 바꾼다. 폰이나 다른 사람이 보는 사이트에
+   반영하려면 GitHub 으로 올려야 하므로, 그 과정을 버튼 하나로 묶었다. */
+async function deployStatus(){
+  try {
+    const r = await api('/api/deploy');
+    if (!r.ok) return;
+    const j = await r.json();
+    $('#pending').textContent = j.pending ? j.pending : '';
+    $('#deploy').title = j.pending
+      ? `아직 공개되지 않은 변경 ${j.pending}건`
+      : '공개된 내용과 같습니다';
+  } catch {}
+}
+
+$('#deploy').onclick = async () => {
+  if (DIRTY && !confirm('저장하지 않은 변경이 있습니다. 저장하지 않고 공개할까요?')) return;
+  const btn = $('#deploy');
+  btn.classList.add('busy');
+  toast('공개하는 중…');
+  try {
+    const r = await api('/api/deploy', { method:'POST', body: JSON.stringify({ message: '내용 수정' }) });
+    const j = await r.json();
+    if (!r.ok) { toast('실패: ' + j.error, true); return; }
+    toast(j.pushed ? j.log.join(' · ') + ' — 1분 뒤 사이트에 반영됩니다' : j.log.join(' · '));
+  } catch (e) {
+    toast('실패: ' + e.message, true);
+  } finally {
+    btn.classList.remove('busy');
+    deployStatus();
+  }
+};
 
 /* 세션 복원 */
 const saved = sessionStorage.getItem('ysw-admin');

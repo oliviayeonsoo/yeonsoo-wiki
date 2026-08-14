@@ -12,6 +12,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
 import { randomBytes } from 'node:crypto';
+import { execFile } from 'node:child_process';
 
 const ROOT     = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONTENT  = join(ROOT, 'data', 'content.json');
@@ -23,6 +24,14 @@ if (existsSync(join(ROOT, 'tools', '.adminpass')))
   PASS = (await readFile(join(ROOT, 'tools', '.adminpass'), 'utf8')).trim();
 
 const tokens = new Set();
+
+/* git 실행 헬퍼 — 배포 버튼이 쓴다 */
+const git = args => new Promise((ok, fail) => {
+  execFile('git', args, { cwd: ROOT, timeout: 120000 }, (err, stdout, stderr) => {
+    if (err) { err.stderr = stderr; return fail(err); }
+    ok(stdout);
+  });
+});
 
 const send = (res, code, body, type = 'application/json; charset=utf-8') => {
   res.writeHead(code, { 'content-type': type, 'cache-control': 'no-store' });
@@ -75,6 +84,44 @@ const server = createServer(async (req, res) => {
       await copyFile(CONTENT, join(BACKUPS, `content-${stamp}.json`));
       await writeFile(CONTENT, JSON.stringify(parsed, null, 2) + '\n', 'utf8');
       return send(res, 200, { ok: true, backup: `data/backups/content-${stamp}.json` });
+    }
+
+    /* --- 배포 상태: 아직 안 올라간 변경이 있는지 --- */
+    if (p === '/api/deploy' && req.method === 'GET') {
+      if (!authed(req)) return send(res, 401, { error: 'unauthorized' });
+      const dirty  = (await git(['status', '--porcelain'])).trim();
+      let ahead = '0';
+      try { ahead = (await git(['rev-list', '--count', '@{u}..HEAD'])).trim(); } catch {}
+      return send(res, 200, {
+        pending: dirty.split('\n').filter(Boolean).length + Number(ahead || 0),
+        dirty: dirty.split('\n').filter(Boolean),
+        ahead: Number(ahead || 0)
+      });
+    }
+
+    /* --- 배포: 커밋 후 푸시 (GitHub Actions가 이어받아 배포) --- */
+    if (p === '/api/deploy' && req.method === 'POST') {
+      if (!authed(req)) return send(res, 401, { error: 'unauthorized' });
+      const { message } = JSON.parse(await readBody(req) || '{}');
+      const log = [];
+      try {
+        const dirty = (await git(['status', '--porcelain'])).trim();
+        if (dirty) {
+          await git(['add', '-A']);
+          const when = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+          await git(['commit', '-m', (message?.trim() || '내용 수정') + `\n\n관리자 화면에서 저장 · ${when}`]);
+          log.push('커밋 완료');
+        } else {
+          log.push('새로 커밋할 변경 없음');
+        }
+        const ahead = Number((await git(['rev-list', '--count', '@{u}..HEAD'])).trim() || 0);
+        if (ahead === 0) return send(res, 200, { ok: true, log: [...log, '이미 최신 상태입니다'], pushed: false });
+
+        await git(['push', 'origin', 'HEAD']);
+        return send(res, 200, { ok: true, log: [...log, `푸시 완료 (커밋 ${ahead}개)`], pushed: true });
+      } catch (e) {
+        return send(res, 500, { error: (e.stderr || e.message || '').toString().slice(0, 500), log });
+      }
     }
 
     /* --- 백업 목록 --- */
