@@ -2,7 +2,7 @@
   "meta": {
     "siteName": "연수위키",
     "mainDoc": "공연수",
-    "updated": "2026-08-14T18:01:23.016Z",
+    "updated": "2026-08-14T18:12:53.558Z",
     "debutDate": "2023-02-28",
     "debutLabel": "",
     "license": "이 문서의 내용 중 전체 또는 일부는 공연수 본인이 작성하였으며, 사실 여부는 본인만이 검증할 수 있습니다.",
@@ -10,7 +10,7 @@
     "birthDate": "2005-01-15"
   },
   "infobox": {
-    "photo": "",
+    "photo": "assets/profile.jpg",
     "banner": {
       "org": "서울과학기술대학교",
       "sub": "산업공학 복수전공"

@@ -139,8 +139,8 @@ function infobox(mini){
     }).join('');
 
   return `<aside class="infobox">
-    ${mini ? '' : `<div class="ib-photo">${ib.photo
-        ? `<img src="${esc(ib.photo)}" alt="${esc(ib.name)}">`
+    ${mini ? '' : `<div class="ib-photo${ib.photo ? ' has-img' : ''}">${ib.photo
+        ? `<img src="${esc(ib.photo)}" alt="${esc(ib.name)}" width="720" height="1080">`
         : '프로필 사진<br>(관리자 화면에서 등록)'}</div>`}
     <div class="ib-banner"><div class="org">${esc(ib.banner.org)}</div><div class="sub">${esc(ib.banner.sub)}</div></div>
     <div class="ib-name">
