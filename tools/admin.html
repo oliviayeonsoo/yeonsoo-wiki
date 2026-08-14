@@ -326,6 +326,38 @@ function renderDocs(){
       <div class="row"><label>안내문</label>${lines(['docs',CURDOC,'hatnotes'], d.hatnotes, '문서 상단 ➜ 안내. 한 줄에 하나', 2)}</div>
     </div></div>
 
+    ${d.navbox ? `<div class="card"><div class="hd">
+      <button class="mini" data-cmd="fold">⌄</button>
+      <span class="t">네브박스 (로스터)</span></div><div class="bd">
+      <div class="row"><label>제목</label>${tx(['docs',CURDOC,'navbox','title'], d.navbox.title)}</div>
+      <div class="row"><label>부제</label>${tx(['docs',CURDOC,'navbox','subtitle'], d.navbox.subtitle)}</div>
+      ${d.navbox.groups.map((g, gi) => {
+        const gp = ['docs',CURDOC,'navbox','groups'];
+        return `<div class="card" style="margin-top:10px"><div class="hd">
+          <span class="t">${esc(g.icon || '')} ${esc(g.pos)} · ${esc(g.label || '')}</span>
+          ${moveBtns(gp, gi, d.navbox.groups.length)}</div><div class="bd">
+          <div class="grid3">
+            ${tx([...gp,gi,'icon'], g.icon || '', '아이콘')}
+            ${tx([...gp,gi,'pos'], g.pos, '포지션 코드')}
+            ${tx([...gp,gi,'label'], g.label || '', '한글 이름')}
+          </div>
+          <table class="ed" style="margin-top:8px"><thead><tr>
+            <th style="width:76px">연도</th><th>이름</th><th style="width:88px">뱃지</th>
+            <th style="width:150px">연결 문서</th><th style="width:34px"></th></tr></thead>
+            <tbody>${g.items.map((it, ii) => `<tr>
+              <td>${tx([...gp,gi,'items',ii,'year'], it.year || '')}</td>
+              <td>${tx([...gp,gi,'items',ii,'name'], it.name)}</td>
+              <td>${tx([...gp,gi,'items',ii,'tag'], it.tag || '')}</td>
+              <td>${tx([...gp,gi,'items',ii,'doc'], it.doc || '')}</td>
+              <td style="text-align:center"><button class="mini del" data-cmd="del"
+                   data-p="${P([...gp,gi,'items'])}" data-i="${ii}">×</button></td></tr>`).join('')}
+            </tbody></table>
+          <div class="tbtn"><button class="mini" data-cmd="nb-item-add" data-p="${P([...gp,gi,'items'])}">+ 항목</button></div>
+        </div></div>`;
+      }).join('')}
+      <button class="mini" style="margin-top:10px" data-cmd="nb-group-add">+ 포지션</button>
+    </div></div>` : ''}
+
     <div style="display:flex;align-items:center;gap:8px;margin:18px 0 8px">
       <h3 style="font-size:15px;margin:0;flex:1">섹션 (${d.sections.length})</h3>
       <button class="mini" data-cmd="renumber">번호 다시 매기기</button>
@@ -547,6 +579,9 @@ document.addEventListener('click', e => {
       toast('번호와 앵커를 다시 매겼습니다');
       break;
     case 'fn-add': (d.footnotes ??= []).push(''); break;
+
+    case 'nb-item-add':  arr.push({ year:'', name:'새 항목', tag:'', doc:'' }); break;
+    case 'nb-group-add': d.navbox.groups.push({ pos:'NEW', icon:'⭐', label:'새 포지션', items:[] }); break;
 
     case 'doc-add': {
       const n = prompt('새 문서 이름 (예: 공연수/수상)'); if (!n) return;

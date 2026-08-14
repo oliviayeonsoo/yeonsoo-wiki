@@ -185,8 +185,19 @@ function renderDoc(name){
       </div>
       <button class="navbox-toggle">[ 펼치기 · 접기 ]</button>
       <div class="navbox-body">${d.navbox.groups.map(g => `<div class="navbox-row">
-        <div class="pos">${esc(g.pos)}</div>
-        <div class="items">${g.items.map(i => `<span class="badge">${esc(i)}</span>`).join('')}</div>
+        <div class="pos">
+          <span class="pi">${esc(g.icon || '')}</span>
+          <span class="pc">${esc(g.pos)}</span>
+          <span class="pl">${esc(g.label || '')}</span>
+        </div>
+        <div class="items">${g.items.map(i => {
+          const inner = `<span class="ry">${i.year ? inline(i.year) : ''}</span>
+            <span class="rn">${esc(i.name)}</span>
+            ${i.tag ? `<span class="rt">${esc(i.tag)}</span>` : ''}`;
+          return i.doc && docExists(i.doc)
+            ? `<a class="ritem" href="#/${encodeURIComponent(i.doc)}">${inner}</a>`
+            : `<span class="ritem">${inner}</span>`;
+        }).join('')}</div>
       </div>`).join('')}</div>
     </div>` : '';
 
