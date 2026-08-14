@@ -4,6 +4,7 @@
 'use strict';
 
 let DATA = null;
+let fnSeq = {};                 // 각주 참조 id 중복 방지용 (문서마다 초기화)
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
@@ -11,6 +12,16 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const docExists = name => !!(DATA && DATA.docs[name]);
 const daysSince = iso => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+
+/* 생년월일에서 나이를 계산한다. 값을 고정해두면 해가 바뀔 때마다 손봐야 하므로 매번 계산. */
+function ages(iso){
+  const b = new Date(iso), now = new Date();
+  let man = now.getFullYear() - b.getFullYear();
+  const before = now.getMonth() < b.getMonth() ||
+                (now.getMonth() === b.getMonth() && now.getDate() < b.getDate());
+  if (before) man--;
+  return { korean: now.getFullYear() - b.getFullYear() + 1, man };
+}
 
 function timeAgo(sec){
   if (sec < 60) return `${sec}초 전`;
@@ -33,9 +44,11 @@ function inline(s, ctx){
   s = String(s ?? '');
   s = s.replace(/'''(.+?)'''/g, '<strong>$1</strong>');
 
+  // 같은 각주를 여러 곳에서 참조할 수 있으므로 id는 참조마다 고유하게 매긴다.
   s = s.replace(/\[fn:(\d+)\]/g, (_, n) => {
+    const k = (fnSeq[n] = (fnSeq[n] || 0) + 1);
     if (ctx) ctx.refs.add(n);
-    return `<sup class="fnref" data-fn="${n}" id="fnref-${n}" role="link" tabindex="0">[${n}]</sup>`;
+    return `<sup class="fnref" data-fn="${n}" id="fnref-${n}-${k}" role="link" tabindex="0">[${n}]</sup>`;
   });
 
   s = s.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, name, label) => {
@@ -154,10 +167,15 @@ function renderDoc(name){
   if (!d){ renderMissing(name); return; }
   const m = DATA.meta;
   const ctx = { refs: new Set() };
+  const age = ages(m.birthDate);
+  fnSeq = {};
 
   const cats = d.categories.map((c, i) =>
     `<span class="${i >= 5 ? 'hidden-cat' : ''}">${i ? '<span class="sep">|</span>' : ''}${esc(c)}</span>`).join('');
 
+  // 각주 참조 번호(fnSeq)가 화면 순서대로 매겨지도록 DOM에 나오는 순서대로 만든다.
+  const hatHtml  = d.hatnotes.map(h => `<div class="hatnote">${inline(h)}</div>`).join('');
+  const ibHtml   = d.showInfobox ? infobox(d.showInfobox === 'mini') : '';
   const secsHtml = d.sections.map(s => section(s, ctx)).join('');
 
   const nav = d.navbox ? `<div class="navbox" data-collapsed="true">
@@ -184,7 +202,7 @@ function renderDoc(name){
     <div class="doc-head">
       <div class="doc-title-row">
         <h1 class="doc-title">${esc(d.title)}</h1>
-        <span class="edit-badge" title="편집 횟수">${m.editCount}</span>
+        <span class="edit-badge" title="나이 (만 ${age.man}세)">${age.korean}</span>
         <div class="doc-actions">
           <button data-act="star">★</button>
           <button data-act="contact" class="primary">편집 요청</button>
@@ -197,9 +215,9 @@ function renderDoc(name){
     </div>
     <div class="cats"><b>분류</b>: ${cats}
       ${d.categories.length > 5 ? '<span class="sep">|</span><span class="more">더 보기</span>' : ''}</div>
-    ${d.hatnotes.map(h => `<div class="hatnote">${inline(h)}</div>`).join('')}
+    ${hatHtml}
     ${nav}
-    ${d.showInfobox ? infobox(d.showInfobox === 'mini') : ''}
+    ${ibHtml}
     ${toc(d.sections)}
     ${secsHtml}
     ${fns}
@@ -253,7 +271,10 @@ const MODALS = {
     <p><a href="mailto:${DATA.meta.contact}">${DATA.meta.contact}</a></p>
     <p><a href="${DATA.infobox.links[1].url}" target="_blank" rel="noopener">LinkedIn으로 연락하기</a></p>`),
   discuss: () => modal('토론', '<p>방명록은 준비 중입니다. 하고 싶은 말은 편집 요청으로 보내주세요.</p>'),
-  history: () => modal('역사', '<p>연혁 타임라인은 준비 중입니다.</p>'),
+  history: () => modal('연혁', `<ol class="timeline">${
+    (DATA.timeline || []).map(([when, what]) =>
+      `<li><span class="tl-when">${esc(when)}</span><span class="tl-what">${inline(what)}</span></li>`).join('')
+  }</ol>`),
   more:    () => modal('더 보기', '<p>이 문서는 나무위키 문서 구조를 분석해 재현한 포트폴리오입니다.</p>'),
   star:    () => modal('즐겨찾기', '<p>즐겨찾기에 추가했습니다. (되진 않았습니다)</p>'),
   edit:    () => modal('편집', '<p>이 문서는 본인만 편집할 수 있습니다.</p><p class="muted">로컬 관리자 화면에서 수정하세요.</p>'),
@@ -262,6 +283,50 @@ const MODALS = {
   recent:  () => modal('최근 변경', `<ul>${DATA.sidebar.recent.map(r =>
              `<li><a href="#/${encodeURIComponent(r.doc)}">${esc(r.doc)}</a> — ${esc(r.note)}</li>`).join('')}</ul>`)
 };
+
+/* ---------------- 각주 미리보기 ----------------
+   각주 번호에 커서를 올리면 내용이 바로 뜬다. 클릭 시 하단 이동은 그대로 유지. */
+let tipEl = null, tipTimer = null;
+
+function showTip(ref){
+  const n = +ref.dataset.fn;
+  const text = DATA.docs[currentDoc]?.footnotes?.[n - 1];
+  if (!text) return;
+
+  if (!tipEl){
+    tipEl = document.createElement('div');
+    tipEl.className = 'fntip';
+    tipEl.addEventListener('mouseenter', () => clearTimeout(tipTimer));
+    tipEl.addEventListener('mouseleave', hideTip);
+    document.body.appendChild(tipEl);
+  }
+  tipEl.innerHTML = `<b>[${n}]</b> ${inline(text)}`;
+  tipEl.hidden = false;
+
+  // 화면 밖으로 나가지 않도록 위치 보정
+  const r = ref.getBoundingClientRect();
+  tipEl.style.left = '0px'; tipEl.style.top = '0px';
+  const w = tipEl.offsetWidth, h = tipEl.offsetHeight, pad = 8;
+  let left = r.left + window.scrollX + r.width / 2 - w / 2;
+  left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
+  const above = r.top > h + 16;
+  const top = above ? r.top + window.scrollY - h - 8 : r.bottom + window.scrollY + 8;
+  tipEl.style.left = left + 'px';
+  tipEl.style.top  = top + 'px';
+  tipEl.dataset.dir = above ? 'up' : 'down';
+}
+const hideTip = () => { if (tipEl) tipEl.hidden = true; };
+
+document.addEventListener('mouseover', e => {
+  const ref = e.target.closest?.('.fnref');
+  if (ref){ clearTimeout(tipTimer); showTip(ref); }
+});
+document.addEventListener('mouseout', e => {
+  if (e.target.closest?.('.fnref')){ clearTimeout(tipTimer); tipTimer = setTimeout(hideTip, 180); }
+});
+document.addEventListener('focusin',  e => { if (e.target.classList?.contains('fnref')) showTip(e.target); });
+document.addEventListener('focusout', e => { if (e.target.classList?.contains('fnref')) hideTip(); });
+window.addEventListener('scroll', hideTip, { passive: true });
 
 /* ---------------- 검색 ---------------- */
 function search(q){
@@ -332,7 +397,7 @@ document.addEventListener('click', e => {
   }
   // 각주 → 본문 복귀 (원본에는 없는 개선)
   if (t.dataset.back){
-    const el = $('#fnref-' + t.dataset.back);
+    const el = $(`#fnref-${t.dataset.back}-1`);   // 여러 번 참조된 각주는 첫 참조로 돌아간다
     if (el) el.scrollIntoView({ block:'center' });
     return;
   }
