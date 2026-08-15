@@ -178,9 +178,18 @@ a.ritem .rn{ color:var(--link); }
 .ib-mini div span:last-child{ color:var(--text-muted); flex:none; }
 .ib-days{ color:var(--accent); font-weight:600; font-size:11.5px; }
 .ib-links{ display:flex; border-top:1px solid var(--border); }
-.ib-links a{ flex:1; text-align:center; padding:9px 4px; font-size:12px; border-right:1px solid var(--border); }
+.ib-links a{ flex:1; display:grid; place-items:center; padding:10px 4px;
+  border-right:1px solid var(--border); color:var(--text-muted); }
 .ib-links a:last-child{ border-right:0; }
 .ib-links a:hover{ background:var(--bg-sub); text-decoration:none; }
+.ib-links a svg{ display:block; }
+/* 브랜드 색은 호버에서만 — 평소엔 인포박스 톤을 해치지 않도록 */
+.ib-links a.github:hover,   .contact .clinks a:hover .ci.github   { color:#181717; }
+.ib-links a.linkedin:hover, .contact .clinks a:hover .ci.linkedin { color:#0a66c2; }
+.ib-links a.instagram:hover,.contact .clinks a:hover .ci.instagram{ color:#e4405f; }
+.ib-links a.mail:hover,     .contact .clinks a:hover .ci.mail     { color:var(--accent); }
+:root[data-theme="dark"] .ib-links a.github:hover{ color:#e6e6e6; }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .ib-links a.github:hover{ color:#e6e6e6; } }
 
 /* ---------- ⑥-a 목차 ---------- */
 .toc{ display:inline-block; border:1px solid var(--border-strong); border-radius:var(--radius);
@@ -240,6 +249,20 @@ a.pthumb:hover{ border-color:var(--accent); }
 .pcard .pawd{ display:inline-block; margin-top:8px; font-size:12px; background:var(--accent);
   color:#fff; padding:2px 9px; border-radius:11px; }
 .pcard .pmore{ font-size:12.5px; font-weight:600; margin-left:8px; white-space:nowrap; }
+
+/* ---------- 발표자료 미리보기 (목록 문서용) ---------- */
+.preview{ border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
+  margin:0 0 14px; background:var(--bg-box); }
+.pv-link{ display:block; }
+.pv-strip{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); }
+.pv-strip img{ width:100%; aspect-ratio:16/9; object-fit:cover; object-position:top; display:block;
+  background:var(--bg-sub); user-select:none; -webkit-user-drag:none; transition:opacity .15s; }
+.pv-link:hover .pv-strip img{ opacity:.82; }
+.pv-foot{ display:flex; align-items:center; gap:10px; padding:7px 11px; border-top:1px solid var(--border); }
+.pv-title{ flex:1; min-width:0; font-size:12.2px; color:var(--text-muted);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pv-more{ flex:none; font-size:12.3px; font-weight:600; }
+@media (max-width:519.98px){ .pv-strip{ grid-template-columns:repeat(2,1fr); } }
 
 /* ---------- 발표자료 갤러리 ---------- */
 .gallery{ border:1px solid var(--border-strong); border-radius:var(--radius); overflow:hidden;
@@ -349,8 +372,8 @@ a.pthumb:hover{ border-color:var(--accent); }
 .contact .clinks a{ display:flex; align-items:center; gap:8px; padding:5px 6px;
   border-radius:var(--radius); font-size:12.3px; color:var(--link); }
 .contact .clinks a:hover{ background:var(--bg-sub); text-decoration:none; }
-.contact .clinks .ci{ flex:none; width:22px; text-align:center; font-size:11px; font-weight:700;
-  color:var(--text-muted); }
+.contact .clinks .ci{ flex:none; width:22px; display:grid; place-items:center; color:var(--text-muted); }
+.contact .clinks .ci svg{ width:17px; height:17px; display:block; }
 
 /* ---------- ⑪ FAB ---------- */
 .fab{ position:fixed; right:16px; bottom:16px; display:flex; flex-direction:column; gap:6px; z-index:50; }
