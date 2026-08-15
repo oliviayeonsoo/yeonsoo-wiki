@@ -83,14 +83,24 @@ function block(b, ctx){
       </table></div>`;
 
     case 'cards':
-      return b.v.map(c => `<div class="pcard">
-        <div class="pname">${inline(c.name, ctx)}
-          ${c.doc && docExists(c.doc)
-            ? `<a class="pmore" href="#/${encodeURIComponent(c.doc)}">자세히 보기 ›</a>` : ''}</div>
-        <div class="ptag">${inline(c.tagline, ctx)}</div>
-        <div class="pbody">${inline(c.body, ctx)}</div>
-        ${c.award ? `<span class="pawd">🏆 ${esc(c.award)}</span>` : ''}
-      </div>`).join('');
+      // 썸네일은 발표자료 첫 장. 링크가 있으면 이미지도 같은 곳으로 들어간다.
+      return b.v.map(c => {
+        const inner = `<div class="pcard-body">
+            <div class="pname">${inline(c.name, ctx)}
+              ${c.doc && docExists(c.doc)
+                ? `<a class="pmore" href="#/${encodeURIComponent(c.doc)}">자세히 보기 ›</a>` : ''}</div>
+            <div class="ptag">${inline(c.tagline, ctx)}</div>
+            <div class="pbody">${inline(c.body, ctx)}</div>
+            ${c.award ? `<span class="pawd">🏆 ${esc(c.award)}</span>` : ''}
+          </div>`;
+        const thumb = c.thumb
+          ? (c.doc && docExists(c.doc)
+              ? `<a class="pthumb" href="#/${encodeURIComponent(c.doc)}" aria-label="${esc(c.name)} 자세히 보기">
+                   <img src="${esc(c.thumb)}" alt="" loading="lazy" draggable="false"></a>`
+              : `<span class="pthumb"><img src="${esc(c.thumb)}" alt="" loading="lazy" draggable="false"></span>`)
+          : '';
+        return `<div class="pcard${c.thumb ? ' has-thumb' : ''}">${thumb}${inner}</div>`;
+      }).join('');
 
     case 'badges':
       return `<div class="bgrid">${b.v.map(g => `<div class="brow">

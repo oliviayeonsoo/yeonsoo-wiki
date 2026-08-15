@@ -220,6 +220,20 @@ a.ritem .rn{ color:var(--link); }
 /* 프로젝트 카드 */
 .pcard{ border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:var(--radius);
   padding:12px 15px; margin:0 0 12px; background:var(--bg-box); }
+/* 발표자료 첫 장을 썸네일로 — 목록에 색이 들어가고 무엇을 만들었는지 바로 보인다 */
+.pcard.has-thumb{ display:flex; gap:14px; align-items:flex-start; }
+.pcard-body{ flex:1; min-width:0; }
+/* 16:9 로 자리를 미리 잡아둔다 — 지연 로딩된 이미지가 들어올 때 레이아웃이 밀리지 않도록 */
+.pthumb{ flex:none; width:190px; aspect-ratio:16/9; border:1px solid var(--border); border-radius:2px;
+  overflow:hidden; line-height:0; background:var(--bg-sub); display:block; }
+.pthumb img{ width:100%; height:auto; display:block; user-select:none; -webkit-user-drag:none;
+  transition:transform .18s ease; }
+a.pthumb:hover img{ transform:scale(1.04); }
+a.pthumb:hover{ border-color:var(--accent); }
+@media (max-width:727.98px){
+  .pcard.has-thumb{ flex-direction:column; gap:10px; }
+  .pthumb{ width:100%; }
+}
 .pcard .pname{ font-size:15.5px; font-weight:700; }
 .pcard .ptag{ font-size:12.8px; color:var(--text-muted); margin-bottom:7px; }
 .pcard .pbody{ font-size:13.8px; }
