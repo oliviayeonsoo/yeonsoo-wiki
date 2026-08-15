@@ -138,6 +138,8 @@ function section(s, ctx, depth = 2){
     <div class="sec-h">
       <button class="sec-fold" aria-label="섹션 접기">⌄</button>
       <${tag}>${s.num}. ${inline(s.title, ctx)}</${tag}>
+      ${s.subdoc && docExists(s.subdoc)
+        ? `<a class="secmore" href="#/${encodeURIComponent(s.subdoc)}">자세히 보기 ›</a>` : ''}
       <span class="edit" data-act="edit">[편집]</span>
     </div>
     <div class="sec-body">${body}</div>
