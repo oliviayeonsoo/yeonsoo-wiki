@@ -84,7 +84,9 @@ function block(b, ctx){
 
     case 'cards':
       return b.v.map(c => `<div class="pcard">
-        <div class="pname">${inline(c.name, ctx)}</div>
+        <div class="pname">${inline(c.name, ctx)}
+          ${c.doc && docExists(c.doc)
+            ? `<a class="pmore" href="#/${encodeURIComponent(c.doc)}">자세히 보기 ›</a>` : ''}</div>
         <div class="ptag">${inline(c.tagline, ctx)}</div>
         <div class="pbody">${inline(c.body, ctx)}</div>
         ${c.award ? `<span class="pawd">🏆 ${esc(c.award)}</span>` : ''}
@@ -95,6 +97,29 @@ function block(b, ctx){
         <div class="bkey">${esc(g.group)}</div>
         <div class="bitems">${g.items.map(i => `<span class="badge">${esc(i)}</span>`).join('')}</div>
       </div>`).join('')}</div>`;
+
+    case 'gallery': {
+      // 페이지 이미지는 워터마크가 구워져 있고 원본 PDF 는 배포하지 않는다.
+      // 캡처 자체는 어떤 방법으로도 막을 수 없으므로 '흔적을 남기는' 쪽으로 설계.
+      const id = 'gal-' + Math.random().toString(36).slice(2, 8);
+      return `<div class="gallery" id="${id}" data-dir="${esc(b.dir)}" data-pages="${b.pages}" data-i="1">
+        <div class="gal-head">
+          <span class="gal-title">${esc(b.title || '발표자료')}</span>
+          <span class="gal-count"><b>1</b> / ${b.pages}</span>
+        </div>
+        <div class="gal-stage">
+          <img class="gal-img" alt="${esc(b.title || '')} 1쪽" draggable="false">
+          <div class="gal-shield"></div>
+          <button class="gal-nav prev" data-gal="prev" aria-label="이전 장">‹</button>
+          <button class="gal-nav next" data-gal="next" aria-label="다음 장">›</button>
+        </div>
+        <div class="gal-thumbs"></div>
+        <div class="gal-foot">
+          <span class="gal-note">열람용입니다. 화면의 자료는 워터마크가 포함된 축소본입니다.</span>
+          <button class="gal-dl" data-act="getfile">원본 파일 요청</button>
+        </div>
+      </div>`;
+    }
 
     case 'quote':
       return `<div class="wquote"><div class="q">"${inline(b.v, ctx)}"</div>
@@ -235,6 +260,7 @@ function renderDoc(name){
     <div class="license">${esc(m.license)}<br>문의: <a href="mailto:${m.contact}">${m.contact}</a></div>
   `;
 
+  initGalleries();
   document.title = `${d.title} - ${m.siteName}`;
   window.scrollTo(0, 0);
 }
@@ -290,6 +316,15 @@ const MODALS = {
     <p><a href="mailto:${DATA.meta.contact}">${DATA.meta.contact}</a></p>
     ${DATA.infobox.links.filter(l => l.label !== 'Email').map(l =>
       `<p><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} 바로가기</a></p>`).join('')}`),
+  getfile: () => {
+    const ig = DATA.infobox.links.find(l => l.label === 'Instagram');
+    modal('원본 파일 요청', `
+      <p>발표자료 원본은 공개하지 않고, 요청해주시면 직접 보내드립니다.</p>
+      <p class="muted" style="font-size:13px">어떤 자료가 필요하신지와 간단한 소개를 함께 적어주시면 빠르게 회신드릴 수 있습니다.</p>
+      <p><a href="mailto:${DATA.meta.contact}?subject=${encodeURIComponent('[연수위키] 발표자료 원본 요청')}">
+        메일로 요청하기 — ${DATA.meta.contact}</a></p>
+      ${ig ? `<p><a href="${esc(ig.url)}" target="_blank" rel="noopener">인스타그램 DM 보내기</a></p>` : ''}`);
+  },
   discuss: () => modal('토론', '<p>방명록은 준비 중입니다. 하고 싶은 말은 편집 요청으로 보내주세요.</p>'),
   history: () => modal('연혁', `<ol class="timeline">${
     (DATA.timeline || []).map(([when, what]) =>
@@ -303,6 +338,57 @@ const MODALS = {
   recent:  () => modal('최근 변경', `<ul>${DATA.sidebar.recent.map(r =>
              `<li><a href="#/${encodeURIComponent(r.doc)}">${esc(r.doc)}</a> — ${esc(r.note)}</li>`).join('')}</ul>`)
 };
+
+/* ---------------- 갤러리 ----------------
+   앞뒤 한 장씩만 미리 받아 41장짜리도 가볍게 넘어가도록 한다. */
+function galShow(g, n){
+  const pages = +g.dataset.pages;
+  n = Math.min(Math.max(1, n), pages);
+  g.dataset.i = n;
+  const src = i => `${g.dataset.dir}/${String(i).padStart(2,'0')}.jpg`;
+
+  const img = $('.gal-img', g);
+  img.src = src(n);
+  img.alt = `${$('.gal-title', g).textContent} ${n}쪽`;
+  $('.gal-count b', g).textContent = n;
+  $('.gal-nav.prev', g).disabled = n === 1;
+  $('.gal-nav.next', g).disabled = n === pages;
+
+  [n-1, n+1].forEach(i => { if (i >= 1 && i <= pages) new Image().src = src(i); });
+
+  const strip = $('.gal-thumbs', g);
+  $$('.gal-th', strip).forEach(t => t.classList.toggle('on', +t.dataset.n === n));
+  const on = $('.gal-th.on', strip);
+  if (on) on.scrollIntoView({ block:'nearest', inline:'center' });
+}
+
+function initGalleries(){
+  $$('.gallery').forEach(g => {
+    const pages = +g.dataset.pages;
+    $('.gal-thumbs', g).innerHTML = Array.from({ length: pages }, (_, k) =>
+      `<button class="gal-th" data-n="${k+1}" aria-label="${k+1}쪽">
+         <img src="${g.dataset.dir}/${String(k+1).padStart(2,'0')}.jpg" loading="lazy" alt="" draggable="false">
+       </button>`).join('');
+    galShow(g, 1);
+    g.addEventListener('contextmenu', e => e.preventDefault());
+    g.addEventListener('dragstart', e => e.preventDefault());
+  });
+}
+
+document.addEventListener('click', e => {
+  const g = e.target.closest?.('.gallery'); if (!g) return;
+  const nav = e.target.closest('[data-gal]');
+  if (nav) return galShow(g, +g.dataset.i + (nav.dataset.gal === 'next' ? 1 : -1));
+  const th = e.target.closest('.gal-th');
+  if (th) return galShow(g, +th.dataset.n);
+});
+document.addEventListener('keydown', e => {
+  if (!/Arrow(Left|Right)/.test(e.key)) return;
+  const g = document.activeElement?.closest?.('.gallery') || $('.gallery');
+  if (!g || $('#modal').hidden === false) return;
+  if (document.activeElement?.tagName === 'INPUT') return;
+  galShow(g, +g.dataset.i + (e.key === 'ArrowRight' ? 1 : -1));
+});
 
 /* ---------------- 각주 미리보기 ----------------
    각주 번호에 커서를 올리면 내용이 바로 뜬다. 클릭 시 하단 이동은 그대로 유지. */

@@ -223,6 +223,49 @@ a.ritem .rn{ color:var(--link); }
 .pcard .pbody{ font-size:13.8px; }
 .pcard .pawd{ display:inline-block; margin-top:8px; font-size:12px; background:var(--accent);
   color:#fff; padding:2px 9px; border-radius:11px; }
+.pcard .pmore{ font-size:12.5px; font-weight:600; margin-left:8px; white-space:nowrap; }
+
+/* ---------- 발표자료 갤러리 ---------- */
+.gallery{ border:1px solid var(--border-strong); border-radius:var(--radius); overflow:hidden;
+  margin:0 0 14px; background:var(--bg-box); }
+.gal-head{ display:flex; align-items:center; gap:10px; padding:8px 12px;
+  background:var(--bg-sub); border-bottom:1px solid var(--border); }
+.gal-title{ font-weight:700; font-size:13.5px; flex:1; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gal-count{ font-size:12.5px; color:var(--text-muted); font-variant-numeric:tabular-nums; flex:none; }
+.gal-count b{ color:var(--text); }
+
+.gal-stage{ position:relative; background:#111; display:flex; align-items:center; justify-content:center; }
+.gal-stage img{ display:block; width:100%; height:auto;
+  user-select:none; -webkit-user-select:none; -webkit-user-drag:none; pointer-events:none; }
+/* 이미지 위 투명막 — 길게 누르기·저장 메뉴를 한 겹 막아준다(캡처는 막지 못함) */
+.gal-shield{ position:absolute; inset:0; }
+.gal-nav{ position:absolute; top:50%; transform:translateY(-50%); width:38px; height:56px;
+  border:0; background:rgba(0,0,0,.42); color:#fff; font-size:26px; cursor:pointer; line-height:1; }
+.gal-nav:hover:not(:disabled){ background:rgba(0,0,0,.65); }
+.gal-nav:disabled{ opacity:.22; cursor:default; }
+.gal-nav.prev{ left:0; border-radius:0 4px 4px 0; }
+.gal-nav.next{ right:0; border-radius:4px 0 0 4px; }
+
+.gal-thumbs{ display:flex; gap:5px; overflow-x:auto; padding:7px 8px;
+  border-top:1px solid var(--border); background:var(--bg); scrollbar-width:thin; }
+.gal-th{ flex:none; width:74px; padding:0; border:2px solid transparent; border-radius:2px;
+  background:none; cursor:pointer; line-height:0; opacity:.55; }
+.gal-th img{ width:100%; height:auto; display:block; pointer-events:none; user-select:none; }
+.gal-th:hover{ opacity:.85; }
+.gal-th.on{ border-color:var(--accent); opacity:1; }
+
+.gal-foot{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:9px 12px; border-top:1px solid var(--border); }
+.gal-note{ flex:1; min-width:180px; font-size:11.8px; color:var(--text-muted); }
+.gal-dl{ flex:none; background:var(--accent); color:#fff; border:0; border-radius:var(--radius);
+  padding:7px 15px; font-size:12.8px; font-weight:700; cursor:pointer; font-family:inherit; }
+.gal-dl:hover{ background:var(--accent-dark); }
+
+@media (max-width:727.98px){
+  .gal-nav{ width:32px; height:48px; font-size:22px; }
+  .gal-th{ width:56px; }
+}
 
 /* 뱃지 그리드 */
 .bgrid{ margin:0 0 14px; }

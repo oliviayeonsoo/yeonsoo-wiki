@@ -3,3 +3,4 @@ tools/.adminpass
 .DS_Store
 node_modules/
 assets/IMG_*
+*.pdf
