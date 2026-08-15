@@ -349,7 +349,12 @@ a.pthumb:hover{ border-color:var(--accent); }
 
 /* ---------- ⑨ 라이선스 ---------- */
 .license{ margin-top:34px; border-top:1px solid var(--border); padding-top:14px;
-  font-size:12.3px; color:var(--text-muted); clear:both; }
+  font-size:12.3px; color:var(--text-muted); clear:both;
+  display:flex; align-items:flex-start; gap:12px; }
+.lic-txt{ flex:1; min-width:0; }
+.lic-gear{ flex:none; background:none; border:0; cursor:pointer; font-size:15px; line-height:1;
+  color:var(--text-muted); opacity:.4; padding:2px 4px; border-radius:var(--radius); }
+.lic-gear:hover{ opacity:1; background:var(--bg-sub); }
 
 /* ---------- ⑩ 사이드바 위젯 ---------- */
 .widget{ border:1px solid var(--border); border-radius:var(--radius); margin-bottom:14px; overflow:hidden; background:var(--bg); }

@@ -44,6 +44,8 @@ const BRAND = {
   link: svg('M10.59 13.41a1 1 0 0 1 0-1.41l3-3a1 1 0 0 1 1.41 1.41l-3 3a1 1 0 0 1-1.41 0zM7.05 16.95a4 4 0 0 1 0-5.66l2.12-2.12 1.42 1.42-2.12 2.12a2 2 0 0 0 2.82 2.82l2.12-2.12 1.42 1.42-2.12 2.12a4 4 0 0 1-5.66 0zm9.9-9.9a4 4 0 0 1 0 5.66l-2.12 2.12-1.42-1.42 2.12-2.12a2 2 0 1 0-2.82-2.82L10.59 10.6 9.17 9.17l2.12-2.12a4 4 0 0 1 5.66 0z')
 };
 
+const ADMIN_URL = 'http://127.0.0.1:8124';
+
 /* 특수 액션 링크 (실제 문서가 아닌 기능) */
 const ACTIONS = { '편집 요청':'contact', '방명록':'discuss', '역사':'history' };
 
@@ -299,7 +301,10 @@ function renderDoc(name){
     ${toc(d.sections)}
     ${secsHtml}
     ${fns}
-    <div class="license">${esc(m.license)}<br>문의: <a href="mailto:${m.contact}">${m.contact}</a></div>
+    <div class="license">
+      <div class="lic-txt">${esc(m.license)}<br>문의: <a href="mailto:${m.contact}">${m.contact}</a></div>
+      <button class="lic-gear" data-act="admin" title="관리자 화면" aria-label="관리자 화면">⚙</button>
+    </div>
   `;
 
   initGalleries();
@@ -359,6 +364,16 @@ const MODALS = {
     <p><a href="mailto:${DATA.meta.contact}">${DATA.meta.contact}</a></p>
     ${DATA.infobox.links.filter(l => l.label !== 'Email').map(l =>
       `<p><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} 바로가기</a></p>`).join('')}`),
+  admin: () => {
+    // 관리자는 로컬 전용 서버라 다른 기기에서는 열리지 않는다.
+    const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+    if (local){ window.open(ADMIN_URL, '_blank', 'noopener'); return; }
+    modal('관리자 화면', `
+      <p>이 사이트의 내용을 고치는 편집기는 <b>제작자 본인의 컴퓨터에서만</b> 실행됩니다.</p>
+      <p class="muted" style="font-size:13px">터미널에서 <code>node tools/admin.mjs</code> 를 실행한 뒤
+        <code>${ADMIN_URL}</code> 로 접속하세요.</p>
+      <p><a href="${ADMIN_URL}" target="_blank" rel="noopener">그래도 열어보기</a></p>`);
+  },
   getfile: () => {
     const ig = DATA.infobox.links.find(l => l.label === 'Instagram');
     modal('원본 파일 요청', `
