@@ -342,10 +342,8 @@ function renderSide(){
         </div>
         <div class="widget-b cal-body">
           <p class="cal-note">${inline(bk.note || '')}</p>
-          <iframe class="cal-frame" src="${esc(bk.embed)}" loading="lazy"
-                  title="${esc(bk.label || '일정 예약')}"></iframe>
-          <a class="cal-open" href="${esc(bk.link || bk.embed)}" target="_blank" rel="noopener">
-            새 창에서 열기 ›</a>
+          <div id="mcal"></div>
+          <button class="cal-cta" data-act="booking">예약 가능 시간 보기</button>
         </div>
       </div>` : ''}
       <div class="widget">
@@ -360,6 +358,7 @@ function renderSide(){
         </div>
       </div>`;
     sideBuilt = true;
+    renderMiniCal();
   }
 
   const shift = Math.floor((Date.now() - sideT0) / 4000) % s.interests.length;
@@ -367,6 +366,57 @@ function renderSide(){
   $('#interest-list').innerHTML = rotated.map((t, i) =>
     `<div class="wrow"><span class="rank">${i+1}</span><span class="wname">${esc(t)}</span></div>`).join('');
 }
+
+
+/* ---------------- 사이드바 미니 달력 ----------------
+   구글 예약 위젯은 폭 400px 미만에서 레이아웃이 뭉개져 사이드바(278px)에 직접 넣을 수 없다.
+   여기서는 날짜만 보여주고, 실제 예약 가능 시간은 넉넉한 모달의 구글 위젯에서 고르게 한다.
+   (예약 가능 여부는 구글만 알고 있으므로 여기서 임의로 표시하지 않는다) */
+let mcalY, mcalM;
+function renderMiniCal(){
+  const box = $('#mcal'); if (!box) return;
+  const now = new Date();
+  if (mcalY === undefined){ mcalY = now.getFullYear(); mcalM = now.getMonth(); }
+
+  const first = new Date(mcalY, mcalM, 1);
+  const days  = new Date(mcalY, mcalM + 1, 0).getDate();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const thisMonth = mcalY === now.getFullYear() && mcalM === now.getMonth();
+
+  const cells = [];
+  for (let i = 0; i < first.getDay(); i++) cells.push('<span class="mcal-d empty"></span>');
+  for (let d = 1; d <= days; d++){
+    const date = new Date(mcalY, mcalM, d);
+    const past = date < today;
+    const dow  = date.getDay();
+    const cls = ['mcal-d', past ? 'past' : '', date.getTime() === today.getTime() ? 'today' : '',
+                 dow === 0 ? 'sun' : dow === 6 ? 'sat' : ''].filter(Boolean).join(' ');
+    cells.push(past
+      ? `<span class="${cls}">${d}</span>`
+      : `<button class="${cls}" data-act="booking" title="${mcalM+1}월 ${d}일 예약 가능 시간 보기">${d}</button>`);
+  }
+
+  box.innerHTML = `<div class="mcal">
+    <div class="mcal-head">
+      <button data-mc="prev" aria-label="이전 달" ${thisMonth ? 'disabled' : ''}>\u2039</button>
+      <span>${mcalY}년 ${mcalM + 1}월</span>
+      <button data-mc="next" aria-label="다음 달">\u203a</button>
+    </div>
+    <div class="mcal-grid">
+      ${['일','월','화','수','목','금','토'].map((w, i) =>
+        `<span class="mcal-w ${i===0?'sun':i===6?'sat':''}">${w}</span>`).join('')}
+      ${cells.join('')}
+    </div>
+  </div>`;
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-mc]'); if (!b) return;
+  mcalM += b.dataset.mc === 'next' ? 1 : -1;
+  if (mcalM > 11){ mcalM = 0; mcalY++; }
+  if (mcalM < 0){ mcalM = 11; mcalY--; }
+  renderMiniCal();
+});
 
 /* ---------------- 모달 ---------------- */
 function modal(title, html, cls){

@@ -454,20 +454,40 @@ a.pthumb:hover{ border-color:var(--accent); }
 .cal-widget[data-collapsed="true"] .cal-fold{ transform:rotate(-90deg); }
 .cal-body{ padding:9px 11px 11px; }
 .cal-note{ margin:0 0 8px; font-size:11.8px; color:var(--text-muted); line-height:1.55; }
-/* 위젯 좌우 여백만큼 넓혀 iframe 폭을 확보한다 (구글 예약 위젯이 좁으면 달력이 뭉갬) */
-.cal-frame{ width:calc(100% + 22px); margin:0 -11px; height:580px; border:0;
-  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
-  background:var(--bg); display:block; }
-.modal-cal{ width:100%; margin:4px 0 10px; border:1px solid var(--border);
-  border-radius:var(--radius); }
-.cal-open{ display:inline-block; margin-top:7px; font-size:12.2px; font-weight:600; }
-.modal-cal{ height:min(66vh, 620px); }
+
+/* 사이드바 미니 달력 */
+.mcal-head{ display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; }
+.mcal-head span{ font-size:12.8px; font-weight:700; }
+.mcal-head button{ background:none; border:1px solid var(--border); border-radius:var(--radius);
+  color:var(--text); width:22px; height:22px; line-height:1; cursor:pointer; font-size:13px; padding:0; }
+.mcal-head button:hover:not(:disabled){ background:var(--bg-sub); }
+.mcal-head button:disabled{ opacity:.3; cursor:default; }
+.mcal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.mcal-w{ font-size:10.5px; text-align:center; color:var(--text-muted); padding-bottom:3px; }
+.mcal-d{ aspect-ratio:1; display:grid; place-items:center; font-size:11.8px; padding:0;
+  border:0; background:none; color:var(--text); border-radius:var(--radius);
+  font-family:inherit; font-variant-numeric:tabular-nums; }
+button.mcal-d{ cursor:pointer; }
+button.mcal-d:hover{ background:var(--accent); color:#fff; }
+.mcal-d.past{ color:var(--border-strong); }
+.mcal-d.empty{ visibility:hidden; }
+.mcal-d.sun{ color:#d9534f; }
+.mcal-d.sat{ color:#4a7fd0; }
+.mcal-d.past.sun, .mcal-d.past.sat{ color:var(--border-strong); }
+.mcal-d.today{ outline:1.5px solid var(--accent); font-weight:700; }
+button.mcal-d.today:hover{ color:#fff; }
+
+.cal-cta{ width:100%; margin-top:9px; background:var(--accent); color:#fff; border:0;
+  border-radius:var(--radius); padding:7px; font-size:12.5px; font-weight:700;
+  cursor:pointer; font-family:inherit; }
+.cal-cta:hover{ background:var(--accent-dark); }
+
+/* 예약 모달 — 구글 위젯이 제대로 그려지려면 폭이 넉넉해야 한다 */
+.modal.cal-modal .modal-box{ max-width:560px; max-height:94vh; }
+.modal.cal-modal .modal-body{ padding:12px; }
+.modal-cal{ width:100%; height:min(72vh, 660px); border:1px solid var(--border);
+  border-radius:var(--radius); background:var(--bg); display:block; margin:4px 0 10px; }
 
 /* 달력 FAB 은 사이드바가 사라지는 폭에서만 (데스크톱은 사이드바 위젯으로 충분) */
 .fab-cal{ display:none; font-size:15px; }
 @media (max-width:1023.98px){ .fab-cal{ display:block; } }
-
-/* 예약 모달은 달력이 들어가므로 더 크게 — 모달 안에서 또 스크롤되는 것을 줄인다 */
-.modal.cal-modal .modal-box{ max-width:560px; max-height:94vh; }
-.modal.cal-modal .modal-body{ padding:12px; }
-.modal.cal-modal .modal-cal{ height:min(72vh, 660px); }
