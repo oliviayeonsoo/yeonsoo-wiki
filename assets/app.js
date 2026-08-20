@@ -618,13 +618,22 @@ function initAnalytics(){
 
   const s = document.createElement('script');
   if (a.provider === 'goatcounter'){
+    // 통계에 남는 주소를 문서 이름 그대로 보이게 한다.
+    // 그냥 두면 해시가 이미 퍼센트 인코딩된 상태로 한 번 더 인코딩돼
+    // 대시보드에 %EA%B3%B5... 같은 문자열이 쌓인다.
+    const docPath = () => {
+      const h = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+      return '/' + (h || DATA.meta.mainDoc);
+    };
+    const hit = () => window.goatcounter?.count({ path: docPath(), title: document.title });
+
+    window.goatcounter = { no_onload: true };   // 자동 집계를 끄고 직접 보낸다
     s.async = true;
     s.src = 'https://gc.zgo.at/count.js';
     s.dataset.goatcounter = `https://${a.id}.goatcounter.com/count`;
+    s.onload = hit;
     // 해시 라우팅이라 문서를 옮길 때마다 직접 알려야 한다
-    window.addEventListener('hashchange', () => {
-      window.goatcounter?.count({ path: location.pathname + location.hash });
-    });
+    window.addEventListener('hashchange', hit);
   } else if (a.provider === 'plausible'){
     s.defer = true;
     s.dataset.domain = a.id;
