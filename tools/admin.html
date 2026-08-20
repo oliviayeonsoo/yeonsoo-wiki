@@ -498,12 +498,32 @@ function renderBasic(){
        <div class="note" style="margin:0 0 9px">한 줄에 하나. 4초마다 순위가 돌아가며 표시됩니다.</div>
        ${lines(['sidebar','interests'], sb.interests, '한 줄에 하나', 7)}
      </div></div>
+     <h3 style="font-size:15px;margin:22px 0 8px">방문 통계</h3>
+     <div class="card"><div class="hd"><span class="t">조회수 집계</span></div><div class="bd">
+       <div class="note" style="margin:0 0 10px">
+         <b>개인 신원은 수집하지 않습니다.</b> 조회수 · 문서별 인기 · 유입 경로 · 국가 · 기기 같은
+         익명 집계만 봅니다. 대시보드는 해당 서비스에 로그인해야 보이므로 본인만 확인할 수 있습니다.<br>
+         비워두면 통계 스크립트를 아예 불러오지 않습니다. 로컬(localhost)에서 보는 것은 집계되지 않습니다.
+       </div>
+       <div class="row"><label>서비스</label>
+         <select data-p='["meta","analytics","provider"]'>
+           <option value="goatcounter">GoatCounter (무료 · 쿠키 없음)</option>
+           <option value="plausible">Plausible (유료)</option>
+           <option value="cloudflare">Cloudflare Web Analytics (무료)</option>
+         </select></div>
+       <div class="row"><label>코드</label>
+         <input type="text" data-p='["meta","analytics","id"]' value=""
+                placeholder="GoatCounter: 내 계정 이름 / Plausible: 도메인 / Cloudflare: 토큰"></div>
+       <div class="tbtn"><button class="mini" id="open-stats">통계 대시보드 열기</button></div>
+     </div></div>
+
      <div class="card"><div class="hd"><span class="t">컨택</span></div><div class="bd">
        <div class="row"><label>제목</label>${tx(['sidebar','contact','title'], c.title || '')}</div>
        <div class="row"><label>안내 문구</label>${ta(['sidebar','contact','note'], c.note || '', '', 2)}</div>
        <div class="row"><label>버튼 문구</label>${tx(['sidebar','contact','cta'], c.cta || '')}</div>
        <div class="note" style="margin:9px 0 0">아래 링크 목록은 <b>인포박스 탭 → 링크</b>와 같은 것을 씁니다.</div>
      </div></div>`;
+  syncStats();
 }
 
 /* ================= 도움말 ================= */
@@ -744,6 +764,24 @@ $('#deploy').onclick = async () => {
     deployStatus();
   }
 };
+
+/* 방문 통계 입력칸 값 반영 + 대시보드 열기 */
+function syncStats(){
+  const a = (DATA.meta.analytics ||= { provider:'goatcounter', id:'' });
+  const sel = document.querySelector('[data-p=\'["meta","analytics","provider"]\']');
+  const inp = document.querySelector('[data-p=\'["meta","analytics","id"]\']');
+  if (sel) sel.value = a.provider || 'goatcounter';
+  if (inp) inp.value = a.id || '';
+}
+document.addEventListener('click', e => {
+  if (e.target.id !== 'open-stats') return;
+  const a = DATA.meta.analytics || {};
+  if (!a.id) return toast('먼저 코드를 입력하고 저장하세요', true);
+  const url = a.provider === 'goatcounter' ? `https://${a.id}.goatcounter.com`
+            : a.provider === 'plausible'   ? `https://plausible.io/${a.id}`
+            : 'https://dash.cloudflare.com/?to=/:account/web-analytics';
+  window.open(url, '_blank', 'noopener');
+});
 
 /* 세션 복원 */
 const saved = sessionStorage.getItem('ysw-admin');

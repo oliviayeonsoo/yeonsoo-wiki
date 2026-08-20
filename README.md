@@ -81,3 +81,23 @@ docs/                   설계 문서 (배포 제외)
 - [`docs/namuwiki-ux-analysis.md`](docs/namuwiki-ux-analysis.md) — 원본 나무위키 문서 UX/UI 실측 분석
 - [`docs/content-structure.md`](docs/content-structure.md) — 나무위키 컴포넌트 → 포트폴리오 치환 매핑
 - [`docs/content-draft.md`](docs/content-draft.md) — 본문 초안
+
+---
+
+## 방문 통계
+
+`data/content.json` 의 `meta.analytics` 에 코드를 넣으면 조회수 집계가 켜진다.
+관리자 **기본 정보 → 방문 통계** 에서 설정한다.
+
+| 항목 | 값 |
+|---|---|
+| GoatCounter | 계정 이름 (`이름.goatcounter.com` 의 앞부분) |
+| Plausible | 도메인 |
+| Cloudflare | 비콘 토큰 |
+
+**볼 수 있는 것**: 조회수, 문서별 인기, 유입 경로(어느 사이트에서 왔는지), 국가, 기기·브라우저
+**볼 수 없는 것**: 방문자가 누구인지. 로그인 없는 사이트에서 개인 신원은 알 수 없고, 알아내려 해서도 안 된다.
+
+- 코드가 비어 있으면 통계 스크립트를 **아예 불러오지 않는다**.
+- `localhost` / `127.0.0.1` 에서 보는 것은 집계되지 않는다 (내가 편집하며 본 것이 조회수에 섞이지 않도록).
+- 대시보드는 해당 서비스에 로그인해야 보이므로 **본인만** 확인할 수 있다.

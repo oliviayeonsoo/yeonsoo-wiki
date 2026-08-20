@@ -2,12 +2,16 @@
   "meta": {
     "siteName": "연수위키",
     "mainDoc": "공연수",
-    "updated": "2026-08-15T13:34:31.838Z",
+    "updated": "2026-08-20T08:02:18.777Z",
     "debutDate": "2023-02-28",
     "debutLabel": "",
     "license": "이 문서의 내용 중 전체 또는 일부는 공연수 본인이 작성하였으며, 사실 여부는 본인만이 검증할 수 있습니다. ",
     "contact": "margaretkong3133@gmail.com",
-    "birthDate": "2005-01-15"
+    "birthDate": "2005-01-15",
+    "analytics": {
+      "provider": "goatcounter",
+      "id": ""
+    }
   },
   "infobox": {
     "photo": "assets/profile.jpg",

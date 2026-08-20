@@ -606,6 +606,38 @@ $('#theme-toggle').addEventListener('click', () => {
 
 window.addEventListener('hashchange', route);
 
+
+/* ---------------- 방문 통계 ----------------
+   개인 신원은 수집하지 않는다. 로그인 없는 사이트에서 방문자가 누구인지 알 방법은 없고,
+   IP 는 개인정보라 보관 자체가 위험하다. 여기서는 익명 집계(조회수·유입 경로·국가·기기)만 다룬다.
+   통계 대시보드는 제공자 계정으로 로그인해야 보이므로 본인만 확인할 수 있다. */
+function initAnalytics(){
+  const a = DATA.meta.analytics;
+  if (!a || !a.id) return;                       // 설정 전에는 아무것도 로드하지 않는다
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;  // 내 작업 중 조회수는 세지 않는다
+
+  const s = document.createElement('script');
+  if (a.provider === 'goatcounter'){
+    s.async = true;
+    s.src = 'https://gc.zgo.at/count.js';
+    s.dataset.goatcounter = `https://${a.id}.goatcounter.com/count`;
+    // 해시 라우팅이라 문서를 옮길 때마다 직접 알려야 한다
+    window.addEventListener('hashchange', () => {
+      window.goatcounter?.count({ path: location.pathname + location.hash });
+    });
+  } else if (a.provider === 'plausible'){
+    s.defer = true;
+    s.dataset.domain = a.id;
+    s.src = 'https://plausible.io/js/script.hash.js';
+  } else if (a.provider === 'cloudflare'){
+    s.defer = true;
+    s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+    s.setAttribute('data-cf-beacon', JSON.stringify({ token: a.id }));
+  } else return;
+
+  document.head.appendChild(s);
+}
+
 /* ---------------- 부트 ---------------- */
 // no-cache: 내용을 갱신했을 때 브라우저가 옛 JSON을 계속 쓰지 않도록 매번 재검증(대개 304)
 fetch('data/content.json', { cache: 'no-cache' })
@@ -618,7 +650,8 @@ fetch('data/content.json', { cache: 'no-cache' })
     route();
     if (!location.hash.includes('act/')) renderDoc(currentDoc);
     renderSide();
-    setInterval(renderSide, 4000);   // 실시간 위젯 연출
+    setInterval(renderSide, 4000);
+    initAnalytics();   // 실시간 위젯 연출
   })
   .catch(err => {
     $('#doc').innerHTML = `<p style="padding:40px 0">콘텐츠를 불러오지 못했습니다.<br>
