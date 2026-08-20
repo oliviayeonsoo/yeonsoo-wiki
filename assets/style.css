@@ -482,11 +482,15 @@ button.mcal-d.today:hover{ color:#fff; }
   cursor:pointer; font-family:inherit; }
 .cal-cta:hover{ background:var(--accent-dark); }
 
-/* 예약 모달 — 구글 위젯이 제대로 그려지려면 폭이 넉넉해야 한다 */
-.modal.cal-modal .modal-box{ max-width:560px; max-height:94vh; }
+/* 예약 모달 — 구글 위젯은 폭이 넓을수록 좋은 레이아웃(달력+시간대 나란히)을 쓴다 */
+.modal.cal-modal .modal-box{ max-width:min(920px, 94vw); max-height:94vh; }
 .modal.cal-modal .modal-body{ padding:12px; }
+/* 구글 예약 페이지는 자체 배경을 깔지 않아 iframe 이 투명해진다.
+   다크 모드에서 우리 모달의 어두운 배경이 비쳐 검은 글자가 안 보이므로
+   흰 배경과 라이트 색상 스킴을 강제한다. */
 .modal-cal{ width:100%; height:min(72vh, 660px); border:1px solid var(--border);
-  border-radius:var(--radius); background:var(--bg); display:block; margin:4px 0 10px; }
+  border-radius:var(--radius); display:block; margin:4px 0 10px;
+  background:#fff; color-scheme:light; }
 
 /* 달력 FAB 은 사이드바가 사라지는 폭에서만 (데스크톱은 사이드바 위젯으로 충분) */
 .fab-cal{ display:none; font-size:15px; }
