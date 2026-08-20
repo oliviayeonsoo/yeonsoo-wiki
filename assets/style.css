@@ -95,7 +95,8 @@ a.new{ color:var(--link-red); }
 /* ---------- 레이아웃 ---------- */
 .wrap{ max-width:var(--maxw); margin:0 auto; padding:18px 16px 60px; display:flex; gap:22px; align-items:flex-start; }
 .col-main{ flex:1; min-width:0; }
-.col-side{ width:var(--side-w); flex:none; position:sticky; top:14px; }
+/* 위젯이 3개(관심사·캘린더·컨택)라 sticky 로 두면 화면보다 길어져 아래가 잘린다 */
+.col-side{ width:var(--side-w); flex:none; }
 
 /* ---------- ② 문서 타이틀 영역 ---------- */
 .doc-head{ border-bottom:2px solid var(--border-strong); padding-bottom:8px; margin-bottom:10px; }
@@ -444,3 +445,29 @@ a.pthumb:hover{ border-color:var(--accent); }
   .gnb,.fab,.col-side,.doc-actions,.sec-fold,.sec-h .edit{ display:none !important; }
   .wrap{ display:block; max-width:none; }
 }
+
+/* ---------- 일정 예약 캘린더 ---------- */
+.cal-widget .widget-h{ display:flex; align-items:center; gap:6px; }
+.cal-fold{ background:none; border:0; color:var(--text-muted); cursor:pointer;
+  font-size:13px; padding:0 2px; line-height:1; transition:transform .15s; }
+.cal-widget[data-collapsed="true"] .cal-body{ display:none; }
+.cal-widget[data-collapsed="true"] .cal-fold{ transform:rotate(-90deg); }
+.cal-body{ padding:9px 11px 11px; }
+.cal-note{ margin:0 0 8px; font-size:11.8px; color:var(--text-muted); line-height:1.55; }
+/* 위젯 좌우 여백만큼 넓혀 iframe 폭을 확보한다 (구글 예약 위젯이 좁으면 달력이 뭉갬) */
+.cal-frame{ width:calc(100% + 22px); margin:0 -11px; height:580px; border:0;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  background:var(--bg); display:block; }
+.modal-cal{ width:100%; margin:4px 0 10px; border:1px solid var(--border);
+  border-radius:var(--radius); }
+.cal-open{ display:inline-block; margin-top:7px; font-size:12.2px; font-weight:600; }
+.modal-cal{ height:min(66vh, 620px); }
+
+/* 달력 FAB 은 사이드바가 사라지는 폭에서만 (데스크톱은 사이드바 위젯으로 충분) */
+.fab-cal{ display:none; font-size:15px; }
+@media (max-width:1023.98px){ .fab-cal{ display:block; } }
+
+/* 예약 모달은 달력이 들어가므로 더 크게 — 모달 안에서 또 스크롤되는 것을 줄인다 */
+.modal.cal-modal .modal-box{ max-width:560px; max-height:94vh; }
+.modal.cal-modal .modal-body{ padding:12px; }
+.modal.cal-modal .modal-cal{ height:min(72vh, 660px); }

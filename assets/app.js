@@ -328,11 +328,26 @@ function renderSide(){
   // 컨택 위젯은 한 번만 만든다. (관심사만 주기적으로 순환)
   if (!sideBuilt){
     const c = s.contact || {};
+    const bk = DATA.meta.booking;
     $('#side').innerHTML = `
       <div class="widget">
         <div class="widget-h">요즘 관심사</div>
         <div class="widget-b" id="interest-list"></div>
       </div>
+      ${bk && bk.embed ? `
+      <div class="widget cal-widget" data-collapsed="false">
+        <div class="widget-h">
+          <button class="cal-fold" aria-label="접기">⌄</button>
+          ${esc(bk.label || '일정 예약')}
+        </div>
+        <div class="widget-b cal-body">
+          <p class="cal-note">${inline(bk.note || '')}</p>
+          <iframe class="cal-frame" src="${esc(bk.embed)}" loading="lazy"
+                  title="${esc(bk.label || '일정 예약')}"></iframe>
+          <a class="cal-open" href="${esc(bk.link || bk.embed)}" target="_blank" rel="noopener">
+            새 창에서 열기 ›</a>
+        </div>
+      </div>` : ''}
       <div class="widget">
         <div class="widget-h">${esc(c.title || '컨택')}</div>
         <div class="widget-b contact">
@@ -354,7 +369,8 @@ function renderSide(){
 }
 
 /* ---------------- 모달 ---------------- */
-function modal(title, html){
+function modal(title, html, cls){
+  $('#modal').className = 'modal' + (cls ? ' ' + cls : '');
   $('#modal-title').textContent = title;
   $('#modal-body').innerHTML = html;
   $('#modal').hidden = false;
@@ -373,6 +389,16 @@ const MODALS = {
       <p class="muted" style="font-size:13px">터미널에서 <code>node tools/admin.mjs</code> 를 실행한 뒤
         <code>${ADMIN_URL}</code> 로 접속하세요.</p>
       <p><a href="${ADMIN_URL}" target="_blank" rel="noopener">그래도 열어보기</a></p>`);
+  },
+  booking: () => {
+    const bk = DATA.meta.booking || {};
+    if (!bk.embed) return;
+    modal(bk.label || '일정 예약', `
+      <p class="muted" style="font-size:13px;margin-top:0">${inline(bk.note || '')}</p>
+      <iframe class="cal-frame modal-cal" src="${esc(bk.embed)}"
+              title="${esc(bk.label || '일정 예약')}"></iframe>
+      <p style="margin-bottom:0"><a href="${esc(bk.link || bk.embed)}" target="_blank" rel="noopener">
+        구글 캘린더에서 열기 ›</a></p>`, 'cal-modal');
   },
   getfile: () => {
     const ig = DATA.infobox.links.find(l => l.label === 'Instagram');
@@ -538,6 +564,12 @@ document.addEventListener('click', e => {
     sec.dataset.folded = sec.dataset.folded === 'true' ? 'false' : 'true';
     return;
   }
+  // 캘린더 위젯 접기
+  if (t.classList.contains('cal-fold')){
+    const w = t.closest('.cal-widget');
+    w.dataset.collapsed = w.dataset.collapsed === 'true' ? 'false' : 'true';
+    return;
+  }
   // 네브박스 접기
   if (t.classList.contains('navbox-toggle')){
     const nb = t.closest('.navbox');
@@ -572,6 +604,7 @@ document.addEventListener('click', e => {
 
   // FAB
   const fab = t.dataset.fab;
+  if (fab === 'cal')    { MODALS.booking(); return; }
   if (fab === 'toc')    { $('#toc')?.scrollIntoView({ block:'start' }); return; }
   if (fab === 'top')    { window.scrollTo({ top:0 }); return; }
   if (fab === 'bottom') { window.scrollTo({ top:document.body.scrollHeight }); return; }

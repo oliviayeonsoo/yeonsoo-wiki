@@ -488,6 +488,7 @@ const BASIC = [
 function renderBasic(){
   const sb = DATA.sidebar || {};
   const c  = sb.contact || {};
+  const bk = DATA.meta.booking || {};
   $('#tab-basic').innerHTML = `<div class="note">저장하면 <b>최근 수정 시각</b>은 자동으로 현재 시각이 됩니다.</div>` +
     BASIC.map(([p, label]) => `<div class="row" style="grid-template-columns:230px 1fr">
       <label>${esc(label)}</label>${tx(p.split('.'), getIn(DATA, p.split('.')) ?? '')}
@@ -498,6 +499,19 @@ function renderBasic(){
        <div class="note" style="margin:0 0 9px">한 줄에 하나. 4초마다 순위가 돌아가며 표시됩니다.</div>
        ${lines(['sidebar','interests'], sb.interests, '한 줄에 하나', 7)}
      </div></div>
+     <h3 style="font-size:15px;margin:22px 0 8px">일정 예약</h3>
+     <div class="card"><div class="hd"><span class="t">구글 캘린더 예약 페이지</span></div><div class="bd">
+       <div class="note" style="margin:0 0 10px">
+         데스크톱은 사이드바에 달력이 직접 박히고, 모바일은 우측 하단 📅 버튼으로 열립니다.<br>
+         <b>임베드 주소</b>는 예약 페이지 주소의 <code>/calendar/</code> 형태에 <code>?gv=true</code> 를 붙인 것입니다.
+         비워두면 달력이 표시되지 않습니다.
+       </div>
+       <div class="row"><label>제목</label>${tx(['meta','booking','label'], bk.label || '')}</div>
+       <div class="row"><label>안내 문구</label>${ta(['meta','booking','note'], bk.note || '', '', 2)}</div>
+       <div class="row"><label>공유 링크</label>${tx(['meta','booking','link'], bk.link || '', 'https://calendar.app.google/...')}</div>
+       <div class="row"><label>임베드 주소</label>${ta(['meta','booking','embed'], bk.embed || '', 'https://calendar.google.com/calendar/appointments/schedules/...?gv=true', 2)}</div>
+     </div></div>
+
      <h3 style="font-size:15px;margin:22px 0 8px">방문 통계</h3>
      <div class="card"><div class="hd"><span class="t">조회수 집계</span></div><div class="bd">
        <div class="note" style="margin:0 0 10px">
