@@ -19,7 +19,15 @@ from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WIDTH = 1200
 QUALITY = 72
-FONT = '/System/Library/Fonts/AppleSDGothicNeo.ttc'
+# 한글 워터마크용 폰트. 앞에서부터 처음 존재하는 것을 쓴다 (macOS → Linux 순).
+FONTS = [
+    '/System/Library/Fonts/AppleSDGothicNeo.ttc',
+    '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+    '/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc',
+    '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
+    '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc',
+]
+FONT = next((f for f in FONTS if os.path.exists(f)), FONTS[0])
 
 
 def watermark(img, text):
