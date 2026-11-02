@@ -4,3 +4,4 @@ tools/.adminpass
 node_modules/
 assets/IMG_*
 *.pdf
+__pycache__/
