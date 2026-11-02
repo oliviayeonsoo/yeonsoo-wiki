@@ -189,18 +189,21 @@ function section(s, ctx, depth = 2){
 /* ---------------- 인포박스 ---------------- */
 function infobox(mini){
   const ib = DATA.infobox, m = DATA.meta;
+  // 인포박스의 각주는 메인 문서 각주다. 하위 문서의 미니 인포박스에서는 현재 문서 각주와
+  // 번호가 겹쳐 엉뚱한 내용이 뜨므로 각주 표시를 빼고 렌더한다.
+  const txt = s => inline(mini ? String(s ?? '').replace(/\[fn:\d+\]/g, '') : s);
   const rows = (mini ? ib.rows.filter(r => ['학력','포지션','주력 도구'].includes(r.label)) : ib.rows)
     .map((r, i) => {
       let v;
       if (r.type === 'collapse'){
         v = `<button class="ib-mini-toggle" data-ibmini="${i}">[ 펼치기 · 접기 ]</button>
              <div class="ib-mini" id="ibmini-${i}" hidden>${
-               r.value.map(([a, b]) => `<div><span>${inline(a)}</span><span>${inline(b)}</span></div>`).join('')
+               r.value.map(([a, b]) => `<div><span>${txt(a)}</span><span>${txt(b)}</span></div>`).join('')
              }</div>`;
       } else if (r.type === 'debut'){
-        v = `${inline(r.value)}<br><span class="ib-days">(데뷔일로부터 +${daysSince(m.debutDate).toLocaleString()}일째)</span>`;
+        v = `${txt(r.value)}<br><span class="ib-days">(데뷔일로부터 +${daysSince(m.debutDate).toLocaleString()}일째)</span>`;
       } else {
-        v = inline(r.value);
+        v = txt(r.value);
       }
       return `<div class="ib-row"><div class="k">${esc(r.label)}</div><div class="v">${v}</div></div>`;
     }).join('');
