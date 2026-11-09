@@ -56,7 +56,7 @@ const SCREENS = [{"name":"S1 사장님 홈","h":793,"nodes":[{"t":"rect","x":0,"
       frame.resize(402, Math.round(H + scr.h + 34));
       frame.x = x; frame.y = y;
       frame.clipsContent = true;
-      const bgRect = scr.nodes.filter((n) => n.t === 'rect' && n.x < 1 && n.y < 1 && n.w > 400).pop();
+      const bgRect = scr.nodes.filter((n) => n.t === 'rect' && n.x < 1 && n.y < 1 && n.w > 400 && paint(n.bg).opacity === 1).pop(); // 반투명 막(시트 뒤 어둡게)은 배경에서 뺀다
       frame.fills = [bgRect ? paint(bgRect.bg) : { type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
       for (const n of scr.nodes) {
         const ny = n.y + H;
@@ -72,6 +72,7 @@ const SCREENS = [{"name":"S1 사장님 홈","h":793,"nodes":[{"t":"rect","x":0,"
           [r.topLeftRadius, r.topRightRadius, r.bottomRightRadius, r.bottomLeftRadius] = n.rad;
           if (n.op < 1) r.opacity = n.op;
           r.x = n.x; r.y = ny;
+          if (n.name === 'backdrop') { r.resize(402, frame.height); r.y = 0; } // 시트 뒤 어두운 막은 상태 표시줄까지 덮는다
         } else if (n.t === 'svg') {
           let svg = n.svg;
           if (!/xmlns=/.test(svg)) svg = svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
@@ -103,6 +104,10 @@ const SCREENS = [{"name":"S1 사장님 홈","h":793,"nodes":[{"t":"rect","x":0,"
           t.name = n.text.slice(0, 30);
           if (n.op < 1) t.opacity = n.op;
           t.x = n.x; t.y = ny;
+          if (n.h === 0) { // 입력칸 안 값: 같은 높이에서 시작하는 칸이 있으면 그 칸 가운데로
+            const box = scr.nodes.find((m) => m.t === 'rect' && Math.abs(m.y - n.y) < 1 && m.x <= n.x && m.x + m.w >= n.x + n.w);
+            if (box) t.y = box.y + H + (box.h - t.height) / 2;
+          }
         }
       }
       if (bars) {
