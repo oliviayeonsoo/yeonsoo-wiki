@@ -4,7 +4,7 @@
 //   모국어 명세서: O 38명, △/? 0명 → 100%
 // 카드: 모국어 명세서 결과를 도넛(100%)으로, 한국어 명세서 결과를 아래 비교 줄(24%)로 보여 준다.
 // 사장님 카드는 건드리지 않는다. 글자와 도넛 링만 바꾸고 지우는 요소는 없다.
-// 실행: ~/Downloads/hp_plugin/code.js 로 복사 후 Figma Slides 덱에서 플러그인 > 개발 > HP Add Slides
+// 실행: ~/Downloads/hp_plugin/code.js 로 복사 후 Figma Slides 덱(figma.com/slides/DVCAPusMwJrTZW1ASKYeed)에서 플러그인 > 개발 > HP Add Slides
 (async () => {
   try {
     const CARD = '2396:147'; // 도넛 카드 · 외국인 직원

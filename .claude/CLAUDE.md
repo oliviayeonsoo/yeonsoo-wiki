@@ -2,7 +2,7 @@
 
 ## 공모전 덱 (Figma Slides)
 
-대상 파일: https://www.figma.com/slides/oHm56PVa1mzuVZtl0KqXN4
+대상 파일: https://www.figma.com/slides/DVCAPusMwJrTZW1ASKYeed (예전 파일 oHm56PVa1mzuVZtl0KqXN4 는 쓰지 않는다)
 배경 자료: `docs/contest-2bank.md`, `docs/contest-2bank-plan.md`, `docs/contest-2bank-differentiation.md`
 
 ### 1. 도구
