@@ -42,7 +42,8 @@
     // 글자: 가운데 정렬 카드라 x는 그대로 두고 내용만 바꾼다
     for (const k of Object.keys(NEW)) n[k].characters = NEW[k];
 
-    // 태그 배경을 글자 폭에 맞춘다
+    // 태그 배경을 글자 폭에 맞춘다. 태그 글자는 폭 64 고정이라 "외국인 38명"이 두 줄로 접히므로 먼저 한 줄로 늘린다
+    n.tag.textAutoResize = 'WIDTH_AND_HEIGHT';
     const padX = n.tag.x - n.tagBg.x;
     n.tagBg.resize(Math.round(n.tag.width + padX * 2), n.tagBg.height);
 
