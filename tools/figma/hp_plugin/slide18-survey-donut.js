@@ -76,7 +76,10 @@
           line.name = c.extra.name;
         }
         line.characters = c.extra.text;
-        line.x = group.x; line.y = src.y; // 카드 폭(330)과 가운데 정렬은 원본과 같다
+        // 그룹 x는 복제 직후 외국인 카드 쪽으로 늘어난 경계를 따라가 어긋나므로, 사장님 카드 배경의 x에 맞춘다
+        const cardBg = group.children.find((n) => n.name === '카드 배경');
+        if (!cardBg) throw new Error('사장님 카드 배경을 찾지 못함: ' + c.group);
+        line.x = cardBg.x; line.y = src.y; // 카드 폭(330)과 가운데 정렬은 원본과 같다
         line.visible = true;
       }
       done.push(`${c.text[c.tag]} ${Math.round(c.ratio * 100)}%`);
