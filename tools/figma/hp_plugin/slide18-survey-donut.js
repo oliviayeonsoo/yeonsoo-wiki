@@ -1,57 +1,88 @@
-// 덱 18번 슬라이드 "직접 현장에 물어봤어요"의 외국인 직원 도넛 카드에 스티커 설문 결과를 넣는다.
-// 설문: "Why was 150,000 won deducted?" 외국인 38명이 한국어 명세서와 모국어 명세서에 각각 O 또는 △/? 스티커를 붙였다.
+// 덱 18번 슬라이드 "직접 현장에 물어봤습니다"의 도넛 카드 2장을 채운다.
+// 외국인 직원 카드: 스티커 설문 실제 결과.
+//   "Why was 150,000 won deducted?" 외국인 38명이 한국어 명세서와 모국어 명세서에 각각 O 또는 △/? 스티커를 붙였다.
 //   한국어 명세서: O 9명, △/? 29명 → 24%
 //   모국어 명세서: O 38명, △/? 0명 → 100%
-// 카드: 모국어 명세서 결과를 도넛(100%)으로, 한국어 명세서 결과를 아래 비교 줄(24%)로 보여 준다.
-// 사장님 카드는 건드리지 않는다. 글자와 도넛 링만 바꾸고 지우는 요소는 없다.
+// 사장님 카드: 아직 테스트 전이라 [예시 값]. 과제 테스트("이번 달 외국인 직원 급여를 보내 보세요",
+//   숙식비 35만 원 > 서면 동의 30만 원 경고를 도움 없이 찾아 고치면 성공) 결과가 나오면 OWNER 값만 바꿔 다시 실행한다.
+// 글자와 도넛 링만 바꾼다. 지우는 요소는 없고, 새로 만드는 것은 사장님 카드 아래 비교 줄 하나뿐이다.
+// 다시 실행해도 같은 결과가 된다 (비교 줄은 이름으로 찾아서 하나만 둔다).
 // 실행: ~/Downloads/hp_plugin/code.js 로 복사 후 Figma Slides 덱(figma.com/slides/DVCAPusMwJrTZW1ASKYeed)에서 플러그인 > 개발 > HP Add Slides
 (async () => {
   try {
-    const CARD = '2396:147'; // 도넛 카드 · 외국인 직원
-    const ID = {
-      tag: '2396:139', // 외국인 직원
-      tagBg: '2396:140', // 태그 배경
-      head: '2396:141', // [ 숙식비가 왜 빠졌는지 맞힌 직원 ]
-      ring: '2396:143', // 진행 링
-      pct: '2396:144', // [00%]
-      cnt: '2396:145', // [ 0명 / 0명 ]
-      ko: '2396:146', // 한국어 명세서일 땐 [ 00% ]
-    };
-    const NEW = {
-      tag: '외국인 38명',
-      head: '15만 원이 왜 빠졌는지\n안다고 답한 외국인',
-      pct: '100%',
-      cnt: '모국어 명세서  38명 / 38명',
-      ko: '한국어 명세서일 땐 24% (9명 / 38명)',
-    };
-    const RATIO = 38 / 38;
+    const OWNER = { ok: 10, total: 12, use: 11 }; // [예시 값] 실제 테스트 결과로 바꿀 것
+    const WORKER = { ok: 38, total: 38, koOk: 9 };
+    const pct = (a, b) => Math.round((a / b) * 100);
 
-    const card = await figma.getNodeByIdAsync(CARD);
-    if (!card) throw new Error('외국인 직원 도넛 카드를 찾지 못함: ' + CARD);
-    const n = {};
-    for (const [k, id] of Object.entries(ID)) {
-      n[k] = await figma.getNodeByIdAsync(id);
-      if (!n[k]) throw new Error('요소를 찾지 못함: ' + k + ' ' + id);
+    const CARDS = [
+      {
+        group: '2396:147', // 도넛 카드 · 외국인 직원
+        tag: '2396:139', tagBg: '2396:140', ring: '2396:143',
+        text: {
+          '2396:139': '외국인 38명',
+          '2396:141': '15만 원이 왜 빠졌는지\n안다고 답한 외국인',
+          '2396:144': `${pct(WORKER.ok, WORKER.total)}%`,
+          '2396:145': `모국어 명세서  ${WORKER.ok}명 / ${WORKER.total}명`,
+          '2396:146': `한국어 명세서일 땐 ${pct(WORKER.koOk, WORKER.total)}% (${WORKER.koOk}명 / ${WORKER.total}명)`,
+        },
+        ratio: WORKER.ok / WORKER.total,
+      },
+      {
+        group: '2396:137', // 도넛 카드 · 사장님
+        tag: '2396:130', tagBg: '2396:131', ring: '2396:134',
+        text: {
+          '2396:130': `사장님 ${OWNER.total}명`,
+          '2396:132': '숙식비 경고를 도움 없이\n찾아 고쳐서 보낸 사장님',
+          '2396:135': `${pct(OWNER.ok, OWNER.total)}%`,
+          '2396:136': `${OWNER.ok}명 / ${OWNER.total}명`,
+        },
+        ratio: OWNER.ok / OWNER.total,
+        extra: { name: '비교 줄 (예시 값)', from: '2396:146', text: `은행 앱에 있으면 쓰겠다 ${OWNER.use}명 / ${OWNER.total}명` },
+      },
+    ];
+
+    const done = [];
+    for (const c of CARDS) {
+      const group = await figma.getNodeByIdAsync(c.group);
+      if (!group) throw new Error('도넛 카드를 찾지 못함: ' + c.group);
+
+      // 글자: 현재 글꼴을 그대로 불러와서 내용만 바꾼다
+      for (const [id, text] of Object.entries(c.text)) {
+        const t = await figma.getNodeByIdAsync(id);
+        if (!t || t.type !== 'TEXT') throw new Error('글자를 찾지 못함: ' + id);
+        for (const s of t.getStyledTextSegments(['fontName'])) await figma.loadFontAsync(s.fontName);
+        t.characters = text;
+      }
+
+      // 태그 배경을 글자 폭에 맞춘다. 태그 글자는 폭이 고정이라 늘어난 글자가 두 줄로 접히므로 먼저 한 줄로 늘린다
+      const tag = await figma.getNodeByIdAsync(c.tag);
+      tag.textAutoResize = 'WIDTH_AND_HEIGHT';
+      const bg = await figma.getNodeByIdAsync(c.tagBg);
+      bg.resize(Math.round(tag.width + (tag.x - bg.x) * 2), bg.height);
+
+      // 도넛: 12시 방향에서 시계 방향으로 비율만큼 (100%는 완전한 고리)
+      const ring = await figma.getNodeByIdAsync(c.ring);
+      const start = -Math.PI / 2;
+      ring.arcData = { startingAngle: start, endingAngle: start + 2 * Math.PI * Math.min(c.ratio, 0.99999), innerRadius: ring.arcData.innerRadius };
+
+      // 사장님 카드 아래 비교 줄: 외국인 카드의 "한국어 명세서일 땐" 줄을 복제해 같은 높이에 둔다
+      if (c.extra) {
+        const src = await figma.getNodeByIdAsync(c.extra.from);
+        for (const s of src.getStyledTextSegments(['fontName'])) await figma.loadFontAsync(s.fontName);
+        let line = group.findOne((n) => n.type === 'TEXT' && n.name === c.extra.name);
+        if (!line) {
+          line = src.clone();
+          group.appendChild(line);
+          line.name = c.extra.name;
+        }
+        line.characters = c.extra.text;
+        line.x = group.x; line.y = src.y; // 카드 폭(330)과 가운데 정렬은 원본과 같다
+        line.visible = true;
+      }
+      done.push(`${c.text[c.tag]} ${Math.round(c.ratio * 100)}%`);
     }
 
-    // 현재 글꼴을 그대로 불러온다 (Pretendard Bold, SemiBold, Medium, Regular)
-    for (const k of ['tag', 'head', 'pct', 'cnt', 'ko']) {
-      for (const s of n[k].getStyledTextSegments(['fontName'])) await figma.loadFontAsync(s.fontName);
-    }
-
-    // 글자: 가운데 정렬 카드라 x는 그대로 두고 내용만 바꾼다
-    for (const k of Object.keys(NEW)) n[k].characters = NEW[k];
-
-    // 태그 배경을 글자 폭에 맞춘다. 태그 글자는 폭 64 고정이라 "외국인 38명"이 두 줄로 접히므로 먼저 한 줄로 늘린다
-    n.tag.textAutoResize = 'WIDTH_AND_HEIGHT';
-    const padX = n.tag.x - n.tagBg.x;
-    n.tagBg.resize(Math.round(n.tag.width + padX * 2), n.tagBg.height);
-
-    // 도넛: 12시 방향에서 시계 방향으로 비율만큼 (100%는 완전한 고리)
-    const start = -Math.PI / 2;
-    n.ring.arcData = { startingAngle: start, endingAngle: start + 2 * Math.PI * Math.min(RATIO, 0.99999), innerRadius: n.ring.arcData.innerRadius };
-
-    figma.closePlugin('18번 외국인 도넛 카드: 모국어 100% (38/38), 한국어 24% (9/38)로 바꿈');
+    figma.closePlugin('18번 도넛 카드 채움: ' + done.join(', ') + ' (사장님은 예시 값)');
   } catch (e) {
     figma.closePlugin('HP 오류: ' + (e && e.message ? e.message : String(e)));
   }
